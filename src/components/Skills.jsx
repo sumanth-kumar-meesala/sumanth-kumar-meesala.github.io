@@ -4,28 +4,28 @@ import { Boxes } from 'lucide-react';
 
 const skillCategories = [
   {
-    title: "Languages & Frameworks",
-    skills: ["Node.js", "JavaScript", "TypeScript", "React.js", "Angular", "Express.js"]
+    title: "AI-Native Engineering",
+    skills: ["LLM application engineering", "RAG pipelines", "Agentic workflows", "Multi-agent orchestration", "Tool / function calling", "Structured output", "Evals & guardrails", "Prompt engineering", "Context engineering"]
   },
   {
-    title: "Backend & Architecture",
-    skills: ["Microservices", "REST APIs", "Event-driven", "API Design"]
+    title: "AI Tooling (Daily Driver)",
+    skills: ["Claude Code", "Cursor", "GitHub Copilot", "Augment Code", "MCP servers", "Autonomous coding agents", "AI code review", "CLAUDE.md / AGENTS.md"]
   },
   {
-    title: "Cloud & DevOps",
-    skills: ["AWS", "Docker", "Jenkins", "CI/CD", "EC2", "S3", "Lambda"]
+    title: "LLM Stack",
+    skills: ["Anthropic Claude", "Claude Agent SDK", "OpenAI GPT-4o", "Llama", "Hugging Face", "Parler-TTS", "LangChain", "LangGraph", "LlamaIndex", "CrewAI", "Pinecone", "ChromaDB", "FAISS", "pgvector"]
   },
   {
-    title: "Databases",
-    skills: ["MongoDB", "SQL Server"]
+    title: "Languages & Runtime",
+    skills: ["TypeScript", "JavaScript (ES6+)", "Node.js", "Python (LLM tooling)", "C# (legacy)"]
   },
   {
-    title: "AI & Developer Tools",
-    skills: ["Claude Code", "Cursor", "Copilot", "Augment Code", "AI Agents"]
+    title: "Backend & Cloud",
+    skills: ["Node.js", "Express", "Next.js", "AWS Lambda", "Serverless", "CloudFormation", "Cognito", "API Gateway", "S3", "DynamoDB", "PostgreSQL", "MongoDB", "REST", "WebSockets", "OAuth 2.0", "JWT", "Docker", "CI/CD"]
   },
   {
-    title: "Other Tools",
-    skills: ["Redux", "Git", "TFS", "Agile/Scrum"]
+    title: "Frontend",
+    skills: ["React 18", "AngularJS", "Redux", "Zustand", "Tailwind", "Material UI", "DaisyUI", "Framer Motion", "Remotion", "Real-time UIs"]
   }
 ];
 
@@ -54,7 +54,7 @@ const Skills = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.5, delay: index * 0.08 }}
               className="glow-border rounded-2xl h-full"
             >
               <div className="glass-card rounded-2xl p-6 h-full flex flex-col items-start border border-white/5 transition-transform hover:-translate-y-1 duration-300">

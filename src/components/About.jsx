@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Code2, Cpu } from 'lucide-react';
+import { User, Code2, Cpu, Bot } from 'lucide-react';
 
 const About = () => {
   return (
@@ -28,32 +28,41 @@ const About = () => {
           className="relative glow-border rounded-3xl"
         >
           <div className="glass-card rounded-3xl p-8 md:p-12 relative overflow-hidden">
-            {/* Decorative background element inside card */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6 text-lg text-slate-300 leading-relaxed">
+              <div className="space-y-5 text-lg text-slate-300 leading-relaxed">
                 <p>
-                  I am a <strong className="text-white">Senior Full Stack Developer</strong> with over 11 years of experience designing high-performance backend services, modern frontend architectures, and integrating innovative tools.
+                  I'm a <strong className="text-white">Senior LLM &amp; Agent Application Engineer</strong> with 11+ years of production experience on Node.js, React, and AngularJS &mdash; now operating as an AI-native product engineer.
                 </p>
                 <p>
-                  My expertise lies in building scalable cloud-native applications using Node.js, React.js, Angular, and AWS. I actively embrace AI-assisted development workflows incorporating tools like Claude Code, Cursor, and GitHub Copilot to significantly accelerate delivery and elevate code quality.
+                  I build <strong className="text-white">LLM-powered features, RAG pipelines, and bounded agentic workflows</strong> on top of typed JavaScript stacks running on AWS. Daily driver of <strong className="text-white">Claude Code, Cursor, GitHub Copilot, and Augment Code</strong> &mdash; I treat AI agents as engineering teammates with explicit responsibilities, context, and guardrails.
                 </p>
                 <p>
-                  Recently, my primary focus has been on architecting AI-driven workflows, robust backend orchestration systems, and maintaining extensive distributed architectures.
+                  Strongest where unclear product requirements meet hard system constraints. I own 0&rarr;1 prototypes through to hardened production at enterprise scale.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
+                  <Bot className="w-8 h-8 text-primary" />
+                  <h3 className="text-white font-semibold">AI-Native</h3>
+                  <p className="text-sm text-slate-400">LLM apps, RAG, Agents</p>
+                </div>
+                <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
                   <Cpu className="w-8 h-8 text-secondary" />
-                  <h3 className="text-white font-semibold">Backend & Cloud</h3>
-                  <p className="text-sm text-slate-400">Node.js, AWS, Microservices</p>
+                  <h3 className="text-white font-semibold">Backend &amp; Cloud</h3>
+                  <p className="text-sm text-slate-400">Node.js, AWS, Serverless</p>
                 </div>
                 <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
                   <Code2 className="w-8 h-8 text-primary" />
-                  <h3 className="text-white font-semibold">Frontend AI</h3>
-                  <p className="text-sm text-slate-400">React, Modern UI, AI Tools</p>
+                  <h3 className="text-white font-semibold">Full-Stack</h3>
+                  <p className="text-sm text-slate-400">React, TypeScript, AngularJS</p>
+                </div>
+                <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
+                  <span className="text-2xl">⚡</span>
+                  <h3 className="text-white font-semibold">Rapid Shipping</h3>
+                  <p className="text-sm text-slate-400">0&rarr;1 with AI workflows</p>
                 </div>
               </div>
             </div>
