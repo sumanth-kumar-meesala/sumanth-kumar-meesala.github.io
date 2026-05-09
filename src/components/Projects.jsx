@@ -116,12 +116,12 @@ const Projects = () => {
                         <Youtube className="w-4 h-4" /> YouTube channel
                       </a>
                       <a
-                        href="https://github.com/sumanth-kumar-meesala/"
+                        href="https://github.com/sumanth-kumar-meesala/content-factory"
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition"
                       >
-                        <ExternalLink className="w-4 h-4" /> GitHub
+                        <ExternalLink className="w-4 h-4" /> Content Factory repo
                       </a>
                     </div>
                   </div>
