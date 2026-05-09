@@ -108,7 +108,7 @@ const Projects = () => {
 
                     <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap gap-2">
                       <a
-                        href="https://www.youtube.com/"
+                        href="https://www.youtube.com/@RashiPhalalu_Telugu/"
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-white px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition"
