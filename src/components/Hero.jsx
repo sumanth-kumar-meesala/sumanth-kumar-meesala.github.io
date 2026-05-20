@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Linkedin, MapPin, Github, Mail } from 'lucide-react';
+import { Linkedin, MapPin, Github, Mail, Download, FileText } from 'lucide-react';
+import Magnet from './reactbits/Magnet';
 
 const Hero = () => {
   const containerVariants = {
@@ -54,30 +55,59 @@ const Hero = () => {
             Side project: an AI content factory (Next.js · Claude Agent SDK · Hugging Face Parler-TTS · Remotion) running a YouTube channel with <strong className="text-secondary">500+ subscribers and 2 lakh+ views</strong>.
           </motion.p>
 
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 mb-10">
+            <Magnet padding={40} magnetStrength={7}>
+              <a
+                href="/Sumanth_Resume.pdf"
+                download
+                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-semibold text-sm text-white bg-gradient-to-r from-primary to-secondary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow"
+              >
+                <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                Download Resume
+              </a>
+            </Magnet>
+            <Magnet padding={40} magnetStrength={7}>
+              <a
+                href="/Sumanth_Detailed_CV.pdf"
+                download
+                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-semibold text-sm text-white glass-card border border-white/15 hover:border-secondary/50 hover:bg-white/5 transition-colors"
+              >
+                <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                Detailed CV
+              </a>
+            </Magnet>
+          </motion.div>
+
           <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-5 md:gap-7 text-slate-400">
-            <a href="https://github.com/sumanth-kumar-meesala/" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-2 group">
-              <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
-                <Github className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium">GitHub</span>
-            </a>
-            <a href="https://linkedin.com/in/sumanthkumarmeesala" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-2 group">
-              <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium">LinkedIn</span>
-            </a>
-            <a href="mailto:meesalasumanth1@gmail.com" className="hover:text-primary transition-colors flex items-center gap-2 group">
-              <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
-                <Mail className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium">Email</span>
-            </a>
+            <Magnet padding={30} magnetStrength={5}>
+              <a href="https://github.com/sumanth-kumar-meesala/" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-2 group">
+                <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
+                  <Github className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">GitHub</span>
+              </a>
+            </Magnet>
+            <Magnet padding={30} magnetStrength={5}>
+              <a href="https://linkedin.com/in/sumanthkumarmeesala" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-2 group">
+                <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">LinkedIn</span>
+              </a>
+            </Magnet>
+            <Magnet padding={30} magnetStrength={5}>
+              <a href="mailto:meesalasumanth1@gmail.com" className="hover:text-primary transition-colors flex items-center gap-2 group">
+                <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">Email</span>
+              </a>
+            </Magnet>
             <div className="flex items-center gap-2 group cursor-default">
               <div className="p-2 rounded-full glass-card group-hover:border-secondary/50 transition-colors">
                 <MapPin className="w-5 h-5" />
               </div>
-              <span className="text-sm font-medium">Hyderabad, India</span>
+              <span className="text-sm font-medium">Melbourne, VIC</span>
             </div>
           </motion.div>
 

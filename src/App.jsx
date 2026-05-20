@@ -7,12 +7,12 @@ import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Infrastructure from './components/Infrastructure';
 import Footer from './components/Footer';
-import MouseRipple from './components/MouseRipple';
+import CustomCursor from './components/CustomCursor';
 
 function App() {
   return (
     <div className="bg-base-100 text-base-content min-h-screen">
-      <MouseRipple />
+      <CustomCursor />
       <Navbar />
       <main>
         <Hero />

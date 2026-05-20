@@ -39,7 +39,7 @@ const Footer = () => {
         </div>
 
         <p className="text-slate-500 text-sm text-center">
-          &copy; {new Date().getFullYear()} Sumanth Kumar Meesala &middot; Senior LLM &amp; Agent Application Engineer &middot; Hyderabad, India
+          &copy; {new Date().getFullYear()} Sumanth Kumar Meesala &middot; Senior LLM &amp; Agent Application Engineer &middot; Melbourne, VIC
         </p>
       </div>
     </footer>

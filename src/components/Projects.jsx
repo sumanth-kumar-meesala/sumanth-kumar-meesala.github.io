@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Youtube, ExternalLink } from 'lucide-react';
+import SpotlightCard from './reactbits/SpotlightCard';
 
 const stack = [
   { label: "Next.js 16", hot: true },
@@ -51,11 +52,14 @@ const Projects = () => {
           transition={{ duration: 0.7 }}
           className="glow-border rounded-3xl"
         >
-          <div className="glass-card rounded-3xl p-8 md:p-12 relative overflow-hidden">
+          <SpotlightCard
+            className="glass-card rounded-3xl p-8 md:p-12"
+            spotlightColor="rgba(6, 182, 212, 0.15)"
+          >
             <div className="absolute -top-24 -left-24 w-72 h-72 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative">
+            <div className="relative z-10">
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <h3 className="text-2xl md:text-3xl font-bold text-white">Telugu Astrology Content Factory</h3>
                 <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-secondary border border-secondary/30 bg-secondary/10">500+ subs · 2 lakh+ views</span>
@@ -128,7 +132,7 @@ const Projects = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </SpotlightCard>
         </motion.div>
       </div>
     </section>

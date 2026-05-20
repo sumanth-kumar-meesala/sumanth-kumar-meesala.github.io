@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { User, Code2, Cpu, Bot } from 'lucide-react';
+import SpotlightCard from './reactbits/SpotlightCard';
 
 const About = () => {
   return (
@@ -44,26 +45,46 @@ const About = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
-                  <Bot className="w-8 h-8 text-primary" />
-                  <h3 className="text-white font-semibold">AI-Native</h3>
-                  <p className="text-sm text-slate-400">LLM apps, RAG, Agents</p>
-                </div>
-                <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
-                  <Cpu className="w-8 h-8 text-secondary" />
-                  <h3 className="text-white font-semibold">Backend &amp; Cloud</h3>
-                  <p className="text-sm text-slate-400">Node.js, AWS, Serverless</p>
-                </div>
-                <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
-                  <Code2 className="w-8 h-8 text-primary" />
-                  <h3 className="text-white font-semibold">Full-Stack</h3>
-                  <p className="text-sm text-slate-400">React, TypeScript, AngularJS</p>
-                </div>
-                <div className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border border-white/5 hover:bg-white/5 transition-colors">
-                  <span className="text-2xl">⚡</span>
-                  <h3 className="text-white font-semibold">Rapid Shipping</h3>
-                  <p className="text-sm text-slate-400">0&rarr;1 with AI workflows</p>
-                </div>
+                <SpotlightCard
+                  className="glass-card rounded-2xl border border-white/5 hover:border-primary/30 transition-colors"
+                  spotlightColor="rgba(139, 92, 246, 0.18)"
+                >
+                  <div className="p-6 flex flex-col items-center justify-center text-center gap-3 relative z-10">
+                    <Bot className="w-8 h-8 text-primary" />
+                    <h3 className="text-white font-semibold">AI-Native</h3>
+                    <p className="text-sm text-slate-400">LLM apps, RAG, Agents</p>
+                  </div>
+                </SpotlightCard>
+                <SpotlightCard
+                  className="glass-card rounded-2xl border border-white/5 hover:border-secondary/30 transition-colors"
+                  spotlightColor="rgba(6, 182, 212, 0.18)"
+                >
+                  <div className="p-6 flex flex-col items-center justify-center text-center gap-3 relative z-10">
+                    <Cpu className="w-8 h-8 text-secondary" />
+                    <h3 className="text-white font-semibold">Backend &amp; Cloud</h3>
+                    <p className="text-sm text-slate-400">Node.js, AWS, Serverless</p>
+                  </div>
+                </SpotlightCard>
+                <SpotlightCard
+                  className="glass-card rounded-2xl border border-white/5 hover:border-primary/30 transition-colors"
+                  spotlightColor="rgba(139, 92, 246, 0.18)"
+                >
+                  <div className="p-6 flex flex-col items-center justify-center text-center gap-3 relative z-10">
+                    <Code2 className="w-8 h-8 text-primary" />
+                    <h3 className="text-white font-semibold">Full-Stack</h3>
+                    <p className="text-sm text-slate-400">React, TypeScript, AngularJS</p>
+                  </div>
+                </SpotlightCard>
+                <SpotlightCard
+                  className="glass-card rounded-2xl border border-white/5 hover:border-secondary/30 transition-colors"
+                  spotlightColor="rgba(6, 182, 212, 0.18)"
+                >
+                  <div className="p-6 flex flex-col items-center justify-center text-center gap-3 relative z-10">
+                    <span className="text-2xl">⚡</span>
+                    <h3 className="text-white font-semibold">Rapid Shipping</h3>
+                    <p className="text-sm text-slate-400">0&rarr;1 with AI workflows</p>
+                  </div>
+                </SpotlightCard>
               </div>
             </div>
           </div>
