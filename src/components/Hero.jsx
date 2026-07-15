@@ -52,7 +52,7 @@ const Hero = () => {
           </motion.p>
 
           <motion.p variants={itemVariants} className="text-sm md:text-base text-slate-500 mb-8 max-w-xl mx-auto">
-            Side project: an AI content factory (Next.js · Claude Agent SDK · Hugging Face Parler-TTS · Remotion) running a YouTube channel with <strong className="text-secondary">500+ subscribers and 2 lakh+ views</strong>.
+            Side project: an AI content factory (Next.js · Claude Agent SDK · Hugging Face Parler-TTS · Remotion) running a YouTube channel with <strong className="text-secondary">2,000+ subscribers and 6 lakh+ views</strong>.
           </motion.p>
 
           <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 mb-10">

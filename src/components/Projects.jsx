@@ -62,7 +62,7 @@ const Projects = () => {
             <div className="relative z-10">
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <h3 className="text-2xl md:text-3xl font-bold text-white">Telugu Astrology Content Factory</h3>
-                <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-secondary border border-secondary/30 bg-secondary/10">500+ subs · 2 lakh+ views</span>
+                <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-secondary border border-secondary/30 bg-secondary/10">2,000+ subs · 6 lakh+ views</span>
                 <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-primary border border-primary/30 bg-primary/10">Live in production</span>
               </div>
 
