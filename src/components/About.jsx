@@ -34,13 +34,13 @@ const About = () => {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-5 text-lg text-slate-300 leading-relaxed">
                 <p>
-                  I'm a <strong className="text-white">Senior LLM &amp; Agent Application Engineer</strong> with 11+ years of production experience on Node.js, React, and AngularJS &mdash; now operating as an AI-native product engineer.
+                  I'm a <strong className="text-white">Senior AI Engineer</strong> with 11+ years of production experience on Node.js, React, and AngularJS &mdash; now building LLM and agent systems as an AI-native product engineer. Currently <strong className="text-white">Senior AI Engineer at Affle</strong>.
                 </p>
                 <p>
                   I build <strong className="text-white">LLM-powered features, RAG pipelines, and bounded agentic workflows</strong> on top of typed JavaScript stacks running on AWS. Daily driver of <strong className="text-white">Claude Code, Cursor, GitHub Copilot, and Augment Code</strong> &mdash; I treat AI agents as engineering teammates with explicit responsibilities, context, and guardrails.
                 </p>
                 <p>
-                  Strongest where unclear product requirements meet hard system constraints. I own 0&rarr;1 prototypes through to hardened production at enterprise scale.
+                  Strongest where unclear product requirements meet hard system constraints. I own 0&rarr;1 prototypes through to hardened production at enterprise scale &mdash; a 360&deg; review platform I built now serves <strong className="text-white">600+ employees across Affle's global offices</strong>, and I founded an AI content system running at <strong className="text-white">2,200+ subscribers and 600k+ views</strong>.
                 </p>
               </div>
 

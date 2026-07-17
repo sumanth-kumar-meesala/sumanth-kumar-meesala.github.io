@@ -36,7 +36,7 @@ const Hero = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
             </span>
-            Available · Senior LLM &amp; Agent Application Engineer
+            Senior AI Engineer @ Affle · Open to opportunities
           </motion.div>
 
           <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight leading-[1.05]">
@@ -46,13 +46,13 @@ const Hero = () => {
 
           <motion.p variants={itemVariants} className="text-lg md:text-xl text-slate-400 mb-3 max-w-2xl mx-auto leading-relaxed">
             Hi, I'm <strong className="text-white font-semibold">Sumanth Kumar Meesala</strong>. 11+ years shipping production
-            <span className="text-white"> Node.js, React, and AngularJS</span> systems &mdash; now operating as an AI-native product engineer.
-            I build LLM-powered features, agentic workflows, and RAG retrieval on AWS, with
+            <span className="text-white"> Node.js, React, and AngularJS</span> systems &mdash; now <span className="text-white">Senior AI Engineer at Affle</span>, where a 360&deg; review platform I built is used by
+            <span className="text-white"> 600+ employees across global offices</span>. I build LLM-powered features, agentic workflows, and RAG retrieval on AWS, with
             <span className="text-white"> Claude Code, Cursor, GitHub Copilot, and Augment Code</span> as my daily driver.
           </motion.p>
 
           <motion.p variants={itemVariants} className="text-sm md:text-base text-slate-500 mb-8 max-w-xl mx-auto">
-            Side project: an AI content factory (Next.js · Claude Agent SDK · Hugging Face Parler-TTS · Remotion) running a YouTube channel with <strong className="text-secondary">2,000+ subscribers and 6 lakh+ views</strong>.
+            Founder of an AI content factory (Next.js · Claude Agent SDK · Hugging Face Parler-TTS · Remotion) &mdash; a fully AI-generated YouTube channel at <strong className="text-secondary">2,200+ subscribers and 600k+ views in 4 months</strong>.
           </motion.p>
 
           <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 mb-10">

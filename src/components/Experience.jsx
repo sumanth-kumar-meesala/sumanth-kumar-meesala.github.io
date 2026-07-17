@@ -4,17 +4,28 @@ import { Briefcase } from 'lucide-react';
 
 const experiences = [
   {
+    role: "Senior AI Engineer",
+    company: "Affle",
+    period: "Apr 2025 – Present",
+    achievements: [
+      "Own and operate a 360° review platform in production — now used by 600+ employees across Affle's global offices — turning peer, manager, and self feedback into structured, LLM-synthesised review reports.",
+      "Scaled the platform from initial rollout to a global user base with a focus on reliability, consistent structured outputs, evals, and report quality.",
+      "Build and maintain production LLM features on Node.js + AWS with cost, latency, and observability controls.",
+      "Converted from a contract engagement (delivered via DashAnalysis from Apr 2025) to a full-time Senior AI Engineer role in Jun 2026."
+    ]
+  },
+  {
     role: "Senior Full-Stack & AI Engineer",
     company: "DashAnalysis Pty Ltd",
-    period: "Aug 2020 – Present",
+    period: "Aug 2020 – Jun 2026",
     achievements: [
       "Architected enterprise RAG pipelines (LangChain + LlamaIndex) over technical-doc corpora — ~40% retrieval-efficiency uplift; sub-minute citation-backed answers replaced multi-day analyst lookups.",
       "Designed and operates autonomous AI agents using LangGraph and CrewAI to automate analytics, reporting, and DynamoDB orchestration workflows.",
       "Integrated Claude (Sonnet / Opus) and GPT-4o into Node.js + AWS Serverless backends with retry, guardrails, structured outputs, and prompt caching — measurably reduced hallucinations and cost.",
       "Productionised Claude Code, Cursor, and Augment Code as the default workflow — shared CLAUDE.md / AGENTS.md context, custom slash commands, MCP-style tool integrations; ~30% faster feature cycle.",
       "Led React 18 + TypeScript front-end re-architecture, retiring legacy AngularJS modules; built real-time dashboards over WebSocket streams.",
-      "Co-built Moose (beige.tech/solutions/moose) — enterprise product platform on AngularJS + AWS serverless (Lambda, CloudFormation, S3, Cognito, DynamoDB).",
-      "Designed, shipped, and operate qrank.it — a 360° employee review application on AngularJS + Node.js + AWS, with LLM-generated review reports.",
+      "Co-built Moose (beige.tech/solutions/moose) — enterprise product platform on AngularJS + AWS serverless (Lambda, CloudFormation, S3, Cognito, DynamoDB); acquired by Kaluza in 2025.",
+      "Designed and built the 360° review platform (qrank.it) on AngularJS + Node.js + AWS with LLM-generated review reports — later deployed at scale across Affle (600+ employees).",
       "Delivered bespoke multi-step agentic workflows (LangGraph + Node.js) for SMB / enterprise clients — replaced manual SOPs with bounded, auditable autonomous flows."
     ]
   },

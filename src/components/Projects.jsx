@@ -41,7 +41,7 @@ const Projects = () => {
             <Sparkles className="w-6 h-6" />
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight text-white">Personal Project</h2>
-          <p className="text-slate-400 max-w-xl text-sm md:text-base">A solo AI side project that ships videos to a real audience, built end-to-end on a typed full-stack with open-source models.</p>
+          <p className="text-slate-400 max-w-xl text-sm md:text-base">An AI product I founded and run solo &mdash; it ships videos to a real audience, built end-to-end on a typed full-stack with open-source models.</p>
           <div className="w-24 h-1 bg-gradient-to-r from-secondary to-primary rounded-full mt-5"></div>
         </motion.div>
 
@@ -62,14 +62,14 @@ const Projects = () => {
             <div className="relative z-10">
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <h3 className="text-2xl md:text-3xl font-bold text-white">Telugu Astrology Content Factory</h3>
-                <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-secondary border border-secondary/30 bg-secondary/10">2,000+ subs · 6 lakh+ views</span>
-                <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-primary border border-primary/30 bg-primary/10">Live in production</span>
+                <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-secondary border border-secondary/30 bg-secondary/10">2,200+ subs · 600k+ views · 4 months</span>
+                <span className="text-[11px] tracking-[.14em] font-mono uppercase px-3 py-1 rounded-full text-primary border border-primary/30 bg-primary/10">Founder · Live in production</span>
               </div>
 
               <div className="grid md:grid-cols-5 gap-8 items-start">
                 <div className="md:col-span-3 space-y-4 text-slate-300 leading-relaxed">
                   <p>
-                    End-to-end AI content factory I designed, built, and run solo. Automates the full <strong className="text-white">script &rarr; TTS &rarr; video &rarr; publish</strong> pipeline for a Telugu astrology YouTube channel.
+                    End-to-end AI content factory I founded, designed, built, and run solo. Automates the full <strong className="text-white">script &rarr; TTS &rarr; video &rarr; publish</strong> pipeline for a Telugu astrology YouTube channel &mdash; every stage AI-generated, now at <strong className="text-white">2,200+ subscribers and 600k+ views in 4 months</strong>.
                   </p>
                   <p>
                     <strong className="text-white">Claude Agent SDK</strong> generates persona-driven scripts; a custom <strong className="text-white">Hugging Face Parler-TTS</strong> server (plus Edge TTS) produces multi-language audio across six Indian languages; <strong className="text-white">Remotion</strong> renders videos with word-level animated subtitles synced to TTS; the whole pipeline auto-publishes to YouTube via OAuth.
