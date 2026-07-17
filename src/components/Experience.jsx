@@ -6,7 +6,7 @@ const experiences = [
   {
     role: "Senior AI Engineer",
     company: "Affle",
-    period: "Apr 2025 – Present",
+    period: "Jun 2025 – Present",
     achievements: [
       "Own and operate a 360° review platform in production — now used by 600+ employees across Affle's global offices — turning peer, manager, and self feedback into structured, LLM-synthesised review reports.",
       "Scaled the platform from initial rollout to a global user base with a focus on reliability, consistent structured outputs, evals, and report quality.",
