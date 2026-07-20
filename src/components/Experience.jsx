@@ -8,10 +8,10 @@ const experiences = [
     company: "Affle",
     period: "Jun 2025 – Present",
     achievements: [
-      "Own and operate a 360° review platform in production — now used by 600+ employees across Affle's global offices — turning peer, manager, and self feedback into structured, LLM-synthesised review reports.",
-      "Scaled the platform from initial rollout to a global user base with a focus on reliability, consistent structured outputs, evals, and report quality.",
+      "Core contributor to Blueprix — a state-machine-based, MCP-enabled agent-orchestration platform (built with the Affle / DashAnalysis team) for shipping reliable production agents to clients. Built its MCP servers/tool integration, multi-agent orchestration, and RAG context management + agent UIs.",
+      "Own and operate Qrank (qrank.it.com), an LLM-powered 360° review platform — now used by 600+ employees across Affle's global offices — turning peer, manager, and self feedback into structured review reports.",
       "Build and maintain production LLM features on Node.js + AWS with cost, latency, and observability controls.",
-      "Converted from a contract engagement (delivered via DashAnalysis from Apr 2025) to a full-time Senior AI Engineer role in Jun 2026."
+      "Converted from a contract engagement (delivered via DashAnalysis from Jun 2025) to a full-time Senior AI Engineer role in Jun 2026."
     ]
   },
   {
@@ -25,7 +25,7 @@ const experiences = [
       "Productionised Claude Code, Cursor, and Augment Code as the default workflow — shared CLAUDE.md / AGENTS.md context, custom slash commands, MCP-style tool integrations; ~30% faster feature cycle.",
       "Led React 18 + TypeScript front-end re-architecture, retiring legacy AngularJS modules; built real-time dashboards over WebSocket streams.",
       "Co-built Moose (beige.tech/solutions/moose) — enterprise product platform on AngularJS + AWS serverless (Lambda, CloudFormation, S3, Cognito, DynamoDB); acquired by Kaluza in 2025.",
-      "Designed and built the 360° review platform (qrank.it) on AngularJS + Node.js + AWS with LLM-generated review reports — later deployed at scale across Affle (600+ employees).",
+      "Designed and built Qrank (qrank.it.com), a 360° review platform on AngularJS + Node.js + AWS with LLM-generated review reports — later deployed at scale across Affle (600+ employees).",
       "Delivered bespoke multi-step agentic workflows (LangGraph + Node.js) for SMB / enterprise clients — replaced manual SOPs with bounded, auditable autonomous flows."
     ]
   },
