@@ -20,9 +20,9 @@ const Skills = () => {
       <SectionHead
         index="003"
         label="Stack"
-        node="mcp"
         title="The stack behind the systems"
         lead="Eleven groups, from the model layer down to the IAM policy that gates it. Everything here is something I have shipped with, not read about."
+        figure={{ kind: 'slabs', caption: 'Typed services on AWS', accent: 'amber', size: 250 }}
       />
 
       <div className="border border-line bg-void/50 backdrop-blur-[6px]">

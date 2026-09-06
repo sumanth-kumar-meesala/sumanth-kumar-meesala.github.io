@@ -5,7 +5,13 @@ import { Section, SectionHead, Reveal, Panel } from './ui/Section';
 
 const Education = () => (
   <Section id="education">
-    <SectionHead index="006" label="Education & standing" node="sources" title="Credentials" />
+    <SectionHead
+      index="006"
+      label="Education & standing"
+      title="Credentials"
+      lead="A data-analytics master's, an engineering degree, and the right to work here without conditions."
+      figure={{ kind: 'crystal', caption: 'Data analytics · Deakin', accent: 'teal', size: 250 }}
+    />
 
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {education.map((e, i) => (

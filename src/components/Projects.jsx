@@ -19,9 +19,9 @@ const Projects = () => (
     <SectionHead
       index="004"
       label="Selected work"
-      node="bedrock"
       title="Three systems, in production"
       lead="Not demos. Each of these has real users, a deploy pipeline and an on-call surface."
+      figure={{ kind: 'branch', caption: 'Build · test · deploy', accent: 'teal', size: 250 }}
     />
 
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

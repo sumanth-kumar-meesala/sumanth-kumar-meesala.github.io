@@ -9,21 +9,34 @@ building LLM-powered features, autonomous agents and multi-step agentic workflow
 At Affle: core contributor to Blueprix (MCP-enabled agent orchestration), owner of Qrank
 (360° review platform used by 600+ employees globally), mentor to the AI team.
 
-## The 3D layer
+## The 3D figures
 
-The background is a live WebGL scene: the agent pipeline I actually build, rendered as a graph.
-Seven nodes — Sources, RAG, MCP tools, Orchestrator, Bedrock, Evals, Production — wired by edges
-that carry travelling packets. **Each node is bound to a page section**, so scrolling ignites the
-node that section is about, and the hero legend names whichever node is currently lit. Scroll also
-drives the camera down the pipeline; the pointer adds parallax.
+Every section carries its own small 3D object — the subject of that section, modelled. They are
+not decoration bolted on; each one is the thing the section is about:
 
-- `src/three/graph.js` — node positions, edges, and the node → section binding
-- `src/three/PipelineScene.jsx` — the R3F canvas, nodes, edges, packets, dust and camera rig
-- `src/hooks/useActiveSection.js` — which section owns the viewport
+| Figure | Section | What it is |
+| --- | --- | --- |
+| `lattice` | Hero | A wireframe shell around a pulsing core, orbit rings and firing nodes — agentic AI |
+| `mesh` | About | Linked cubes with a packet hopping between them — multi-agent orchestration |
+| `slabs` | Stack | A stack of server slabs with sequencing status LEDs; hovering fans them apart |
+| `branch` | Selected work | A trunk splitting into build/test/deploy leaves, with a packet running the tree |
+| `bars` | Experience | Six growing bars with lit caps — 2015 → 2026 |
+| `crystal` | Education | A faceted gem with a glowing core and orbiting satellites |
+| `beacon` | Contact | A pulsing core throwing expanding rings |
 
-It is decorative and defensive: `aria-hidden`, `pointer-events: none`, code-split out of the main
-bundle so the page paints first, fewer particles and lower DPR on small screens, and **frozen
-entirely when the visitor prefers reduced motion**. All content is real DOM above it.
+**They are interactive.** Drag any figure to rotate it — it keeps momentum on release, then the
+tilt eases back to its resting angle. Hovering lifts it, brightens it, speeds up its motion and
+lights the caption marker.
+
+- `src/three/models.jsx` — the seven models, each a plain three.js group
+- `src/three/Figure.jsx` — canvas wrapper, lighting, hover and drag wiring
+- `src/three/useDragRotate.js` — pointer → rotation, momentum and settle
+- `src/components/ui/Figure3D.jsx` — lazy boundary with a matching skeleton
+
+Built defensively: each figure is `role="img"` with its caption as the accessible label,
+rendering **pauses whenever the figure scrolls off-screen**, `touch-action: pan-y` keeps vertical
+scrolling working on touch, three.js is code-split out of the first paint (page 120 kB gzip,
+figures 238 kB after), and everything goes still under `prefers-reduced-motion`.
 
 ## Design
 
@@ -50,7 +63,7 @@ render from it and hold no copy of their own.
 ## Stack
 
 - React 19 + Vite
-- three.js · @react-three/fiber · @react-three/drei
+- three.js · @react-three/fiber
 - Tailwind CSS 3
 - Framer Motion (scroll reveals)
 - lucide-react · react-scroll
@@ -74,12 +87,12 @@ publishes `dist/` to GitHub Pages.
 
 ## Sections
 
-| # | Section | 3D node | Contents |
+| # | Section | Figure | Contents |
 | --- | --- | --- | --- |
-| 001 | Hero | Orchestrator | Name, role, positioning, résumé downloads, pipeline legend, four headline figures |
-| 002 | About | RAG | Narrative plus four capability pillars |
-| 003 | Stack | MCP tools | 11-group capability accordion; the three core groups open by default |
-| 004 | Selected work | Bedrock | Blueprix · Qrank · Content Factory, plus Moose and Moonee Valley Council |
-| 005 | Experience | Evals | Affle, DashAnalysis, Blaque Fracture, Archimedes, Blockfreight, ContenTerra |
-| 006 | Education & standing | Sources | Deakin M.IT, CVR B.Tech, Australian work rights |
-| 007 | Contact | Production | Email, LinkedIn, GitHub, location, résumé downloads |
+| 001 | Hero | lattice | Name, role, positioning, résumé downloads, four headline figures |
+| 002 | About | mesh | Narrative plus four capability pillars |
+| 003 | Stack | slabs | 11-group capability accordion; the three core groups open by default |
+| 004 | Selected work | branch | Blueprix · Qrank · Content Factory, plus Moose and Moonee Valley Council |
+| 005 | Experience | bars | Affle, DashAnalysis, Blaque Fracture, Archimedes, Blockfreight, ContenTerra |
+| 006 | Education & standing | crystal | Deakin M.IT, CVR B.Tech, Australian work rights |
+| 007 | Contact | beacon | Email, LinkedIn, GitHub, location, résumé downloads |

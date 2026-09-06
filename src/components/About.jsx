@@ -7,8 +7,9 @@ const About = () => (
     <SectionHead
       index="002"
       label="About"
-      node="rag"
       title={about.headline}
+      lead={about.lead}
+      figure={{ kind: 'mesh', caption: 'Multi-agent orchestration', accent: 'teal', size: 250 }}
     />
 
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">

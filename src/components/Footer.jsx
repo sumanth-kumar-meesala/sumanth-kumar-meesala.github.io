@@ -3,6 +3,7 @@ import { Link } from 'react-scroll';
 import { ArrowUp, Download, FileText, Github, Linkedin, Mail, MapPin } from 'lucide-react';
 import { profile } from '../data/resume';
 import { Reveal, Panel } from './ui/Section';
+import Figure from './ui/Figure3D';
 
 const channels = [
   { label: 'Email', value: profile.email, href: `mailto:${profile.email}`, Icon: Mail },
@@ -14,24 +15,28 @@ const channels = [
 const Footer = () => (
   <footer id="contact" className="relative scroll-mt-24 pt-20 lg:pt-28">
     <div className="shell relative">
-      <Reveal>
-        <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="meta text-teal">[ 007 ]</span>
-          <span className="meta text-dim">Contact</span>
-          <span className="hidden h-px flex-1 bg-gradient-to-r from-line to-transparent sm:block" />
-          <span className="meta flex items-center gap-2 text-dim">
-            <span className="inline-block h-1.5 w-1.5 animate-pulse-dot bg-amber" />
-            node/production
-          </span>
-        </div>
-      </Reveal>
+      <div className="grid grid-cols-1 items-center gap-x-10 gap-y-10 lg:grid-cols-12">
+        <div className="lg:col-span-7">
+          <Reveal>
+            <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="meta text-teal">[ 007 ]</span>
+              <span className="meta text-dim">Contact</span>
+              <span className="hidden h-px flex-1 bg-gradient-to-r from-line to-transparent sm:block" />
+            </div>
+          </Reveal>
 
-      <Reveal delay={0.06}>
-        <h2 className="balance max-w-3xl text-[32px] font-semibold leading-[1.05] tracking-[-0.035em] md:text-[46px] lg:text-[58px]">
-          Building something that
-          <span className="text-teal"> needs to actually work?</span>
-        </h2>
-      </Reveal>
+          <Reveal delay={0.06}>
+            <h2 className="balance text-[32px] font-semibold leading-[1.05] tracking-[-0.035em] md:text-[46px] lg:text-[56px]">
+              Building something that
+              <span className="text-teal"> needs to actually work?</span>
+            </h2>
+          </Reveal>
+        </div>
+
+        <Reveal delay={0.14} className="lg:col-span-4 lg:col-start-9">
+          <Figure kind="beacon" caption="Melbourne, VIC · open" accent="amber" size={250} />
+        </Reveal>
+      </div>
 
       <Reveal delay={0.12} className="mt-12">
         <div className="grid grid-cols-1 gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">

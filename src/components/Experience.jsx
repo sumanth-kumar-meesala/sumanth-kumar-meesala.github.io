@@ -7,9 +7,9 @@ const Experience = () => (
     <SectionHead
       index="005"
       label="Experience"
-      node="evals"
       title="Eleven years, six teams"
       lead="From ASP.NET and SQL Server in 2015 to agent orchestration on Bedrock in 2026 — the same engineering habits, a very different stack."
+      figure={{ kind: 'bars', caption: '2015 → 2026', accent: 'amber', size: 250 }}
     />
 
     <div className="relative">

@@ -31,8 +31,9 @@ export const stats = [
 ];
 
 export const about = {
-  headline:
-    'AI agents as engineering teammates — with explicit responsibilities, context and guardrails.',
+  headline: 'AI agents as engineering teammates',
+  lead:
+    'Given explicit responsibilities, context and guardrails — reviewable like any other part of the system, not a black box bolted on the side.',
   paragraphs: [
     'I started in .NET and AngularJS in 2015 and spent a decade shipping full-stack product systems. Today I build the LLM layer on top of that same discipline — typed JavaScript services on AWS, tested, observable, and gated on evals rather than vibes.',
     'Strongest where unclear product requirements meet hard system constraints. I own 0→1 prototypes through to hardened production — and I mentor the engineers who maintain them.',
