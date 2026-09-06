@@ -15,7 +15,7 @@ export const profile = {
   linkedinLabel: 'in/sumanthkumarmeesala',
   github: 'https://github.com/sumanth-kumar-meesala/',
   githubLabel: 'sumanth-kumar-meesala',
-  resume: '/Sumanth_Resume.pdf',
+  resume: '/Sumanth_Resume_V2.pdf',
   detailedCv: '/Sumanth_Detailed_CV.pdf',
   lead:
     'Eleven years building production Node.js, React and Angular systems — now an AI-native product engineer shipping LLM-powered features, autonomous agents and multi-step agentic workflows on AWS.',
