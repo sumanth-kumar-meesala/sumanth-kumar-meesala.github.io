@@ -5,125 +5,110 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: #030014;
-    color: #f8fafc;
+    background-color: #0B0D12;
+    color: #E8EAF0;
   }
-  
+
   body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
+
+  ::selection {
+    background: #22D3C5;
+    color: #0B0D12;
+  }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: #0B0D12; }
+  ::-webkit-scrollbar-thumb { background: #232838; }
+  ::-webkit-scrollbar-thumb:hover { background: #2F3648; }
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-shell px-5 md:px-8 lg:px-10;
+  }
+
+  .meta {
+    @apply font-mono text-meta uppercase;
+  }
+
+  /* Terminal-style panel: hairline border over a translucent surface,
+     so the 3D scene stays faintly visible behind the content. */
+  .panel {
+    @apply relative border border-line bg-surface/70 backdrop-blur-[6px];
+  }
+
+  .panel-quiet {
+    @apply relative border border-line-2 bg-surface/40 backdrop-blur-[4px];
+  }
+
+  .tag {
+    @apply border border-line bg-surface-2/60 px-2.5 py-1.5 font-mono text-[11px] tracking-[0.04em] text-muted
+           transition-colors hover:border-teal/50 hover:text-text;
+  }
+
+  .tag-hot {
+    @apply border border-teal/35 bg-teal/[0.07] px-2.5 py-1.5 font-mono text-[11px] tracking-[0.04em] text-teal
+           transition-colors hover:border-teal hover:bg-teal/15;
+  }
+
+  .btn-primary {
+    @apply relative inline-flex h-[50px] items-center justify-center gap-2 border border-teal/50 bg-teal/10 px-6
+           text-sm font-medium tracking-[0.02em] text-teal transition-all
+           hover:bg-teal hover:text-void hover:shadow-[0_0_28px_-4px_rgba(34,211,197,0.55)]
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal;
+  }
+
+  .btn-ghost {
+    @apply inline-flex h-[50px] items-center justify-center gap-2 border border-line bg-surface/50 px-6
+           text-sm font-medium tracking-[0.02em] text-muted transition-all
+           hover:border-amber/50 hover:text-amber
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber;
+  }
+
+  /* Corner ticks — the recurring "instrument panel" motif */
+  .ticks::before,
+  .ticks::after {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-color: rgba(34, 211, 197, 0.55);
+    pointer-events: none;
+  }
+  .ticks::before { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
+  .ticks::after { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
 }
 
 @layer utilities {
-  .glass-nav {
-    @apply bg-[#030014]/50 backdrop-blur-md border-b border-white/5;
+  .pretty { text-wrap: pretty; }
+  .balance { text-wrap: balance; }
+
+  .text-glow-teal { text-shadow: 0 0 24px rgba(34, 211, 197, 0.35); }
+
+  .hairline-grid {
+    background-image:
+      linear-gradient(to right, rgba(35, 40, 56, 0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(35, 40, 56, 0.5) 1px, transparent 1px);
+    background-size: 64px 64px;
   }
 
-  .glass-card {
-    @apply bg-[#0d0a20]/60 backdrop-blur-sm border border-white/10;
-  }
-  
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
-  }
-
-  .glow-border {
-    position: relative;
-  }
-  
-  .glow-border::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(to right, #8b5cf6, #06b6d4);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.3;
-    transition: opacity 0.3s ease;
-  }
-
-  .glow-border:hover::before {
-    opacity: 1;
-  }
-}
-
-/* === Custom cursor === */
-.cursor-none,
-.cursor-none * {
-  cursor: none !important;
-}
-
-.custom-cursor-ring,
-.custom-cursor-dot {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0;
-  will-change: transform, opacity, width, height;
-}
-
-.custom-cursor-ring {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(139, 92, 246, 0.7);
-  box-shadow: 0 0 18px rgba(139, 92, 246, 0.25);
-  transition:
-    opacity 0.25s ease,
-    width 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.25s ease,
-    background-color 0.25s ease;
-  mix-blend-mode: difference;
-}
-
-.custom-cursor-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #06b6d4;
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.65);
-  transition: opacity 0.2s ease, transform 0.08s ease-out, width 0.2s ease, height 0.2s ease;
-}
-
-.cursor-ring-active {
-  width: 56px;
-  height: 56px;
-  border-color: rgba(6, 182, 212, 0.85);
-  background: rgba(6, 182, 212, 0.08);
-  box-shadow: 0 0 28px rgba(6, 182, 212, 0.35);
-}
-
-.cursor-dot-active {
-  width: 4px;
-  height: 4px;
-  background: #ffffff;
-}
-
-.cursor-ring-down {
-  width: 24px;
-  height: 24px;
-  border-color: rgba(255, 255, 255, 0.9);
-}
-
-@media (hover: none), (max-width: 768px) {
-  .custom-cursor-ring,
-  .custom-cursor-dot {
-    display: none !important;
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .custom-cursor-ring,
-  .custom-cursor-dot {
-    display: none !important;
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

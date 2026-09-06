@@ -1,117 +1,130 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Linkedin, MapPin, Github, Mail, Download, FileText } from 'lucide-react';
-import Magnet from './reactbits/Magnet';
+import { motion as Motion } from 'framer-motion';
+import { Download, FileText, MapPin } from 'lucide-react';
+import { profile, stats } from '../data/resume';
+import { NODES } from '../three/graph';
 
-const Hero = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.18, delayChildren: 0.25 }
-    }
-  };
+const container = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
+};
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } }
-  };
+const Hero = ({ activeSection }) => {
+  const activeNode = NODES.find((n) => n.section === activeSection) ?? NODES[3];
 
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
-      {/* Premium Background Elements */}
-      <div className="absolute top-[18%] left-[12%] w-[520px] h-[520px] bg-primary/20 rounded-full blur-[130px] -z-10 animate-pulse-slow" />
-      <div className="absolute bottom-[8%] right-[8%] w-[600px] h-[600px] bg-secondary/15 rounded-full blur-[150px] -z-10 animate-float" />
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay -z-10 pointer-events-none"></div>
-
-      <div className="container mx-auto px-6 z-10">
-        <motion.div
-          className="max-w-4xl mx-auto text-center"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div variants={itemVariants} className="mb-8 inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass-card border border-white/5 shadow-xl text-sm font-medium text-slate-300">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
+    <section id="home" className="relative flex min-h-svh items-center pt-24 pb-16 lg:pt-28">
+      <div className="shell relative">
+        <Motion.div variants={container} initial="hidden" animate="visible" className="max-w-4xl">
+          <Motion.div variants={item} className="mb-8 inline-flex items-center gap-3 border border-line bg-surface/60 px-4 py-2 backdrop-blur-sm">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping bg-teal opacity-70" />
+              <span className="relative inline-flex h-1.5 w-1.5 bg-teal" />
             </span>
-            Senior AI Engineer @ Affle · Open to opportunities
-          </motion.div>
+            <span className="meta text-muted">{profile.role} @ Affle · Open to opportunities</span>
+          </Motion.div>
 
-          <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight leading-[1.05]">
-            Building <span className="text-gradient">AI-native</span><br className="hidden md:block" />
-            product systems.
-          </motion.h1>
+          <Motion.h1
+            variants={item}
+            className="m-0 text-[42px] font-semibold leading-[0.98] tracking-[-0.04em] sm:text-[62px] lg:text-[88px]"
+          >
+            <span className="block text-text">{profile.firstName} {profile.middleName}</span>
+            <span className="block text-glow-teal text-teal">{profile.lastName}</span>
+          </Motion.h1>
 
-          <motion.p variants={itemVariants} className="text-lg md:text-xl text-slate-400 mb-3 max-w-2xl mx-auto leading-relaxed">
-            Hi, I'm <strong className="text-white font-semibold">Sumanth Kumar Meesala</strong>. 11+ years shipping production
-            <span className="text-white"> Node.js, React, and AngularJS</span> systems &mdash; now <span className="text-white">Senior AI Engineer at Affle</span>, where a 360&deg; review platform I built is used by
-            <span className="text-white"> 600+ employees across global offices</span>. I build LLM-powered features, agentic workflows, and RAG retrieval on AWS, with
-            <span className="text-white"> Claude Code, Cursor, GitHub Copilot, and Augment Code</span> as my daily driver.
-          </motion.p>
+          <Motion.div variants={item} className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="font-mono text-[13px] tracking-[0.06em] text-muted md:text-[15px]">
+              {profile.role}
+            </span>
+            <span className="h-3 w-px bg-line" />
+            <span className="font-mono text-[13px] tracking-[0.06em] text-amber md:text-[15px]">
+              {profile.discipline}
+            </span>
+          </Motion.div>
 
-          <motion.p variants={itemVariants} className="text-sm md:text-base text-slate-500 mb-8 max-w-xl mx-auto">
-            Founder of an AI content factory (Next.js · Claude Agent SDK · Hugging Face Parler-TTS · Remotion) &mdash; a fully AI-generated YouTube channel at <strong className="text-secondary">2,200+ subscribers and 600k+ views in 4 months</strong>.
-          </motion.p>
+          <Motion.p variants={item} className="pretty mt-8 max-w-2xl text-[16px] leading-relaxed text-muted md:text-[18px]">
+            {profile.lead}
+          </Motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 mb-10">
-            <Magnet padding={40} magnetStrength={7}>
-              <a
-                href="/Sumanth_Resume.pdf"
-                download
-                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-semibold text-sm text-white bg-gradient-to-r from-primary to-secondary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow"
-              >
-                <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                Download Resume
-              </a>
-            </Magnet>
-            <Magnet padding={40} magnetStrength={7}>
-              <a
-                href="/Sumanth_Detailed_CV.pdf"
-                download
-                className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full font-semibold text-sm text-white glass-card border border-white/15 hover:border-secondary/50 hover:bg-white/5 transition-colors"
-              >
-                <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                Detailed CV
-              </a>
-            </Magnet>
-          </motion.div>
+          <Motion.p variants={item} className="pretty mt-4 max-w-2xl text-[14px] leading-relaxed text-dim md:text-[15px]">
+            {profile.sub}
+          </Motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-5 md:gap-7 text-slate-400">
-            <Magnet padding={30} magnetStrength={5}>
-              <a href="https://github.com/sumanth-kumar-meesala/" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-2 group">
-                <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
-                  <Github className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-medium">GitHub</span>
-              </a>
-            </Magnet>
-            <Magnet padding={30} magnetStrength={5}>
-              <a href="https://linkedin.com/in/sumanthkumarmeesala" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors flex items-center gap-2 group">
-                <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
-                  <Linkedin className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-medium">LinkedIn</span>
-              </a>
-            </Magnet>
-            <Magnet padding={30} magnetStrength={5}>
-              <a href="mailto:meesalasumanth1@gmail.com" className="hover:text-primary transition-colors flex items-center gap-2 group">
-                <div className="p-2 rounded-full glass-card group-hover:border-primary/50 transition-colors">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-medium">Email</span>
-              </a>
-            </Magnet>
-            <div className="flex items-center gap-2 group cursor-default">
-              <div className="p-2 rounded-full glass-card group-hover:border-secondary/50 transition-colors">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium">Melbourne, VIC</span>
+          <Motion.div variants={item} className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <a href={profile.resume} download className="btn-primary">
+              <Download className="h-4 w-4" /> Download résumé
+            </a>
+            <a href={profile.detailedCv} download className="btn-ghost">
+              <FileText className="h-4 w-4" /> Detailed CV
+            </a>
+            <span className="meta ml-0 mt-2 flex items-center gap-2 text-dim sm:ml-3 sm:mt-0">
+              <MapPin className="h-3.5 w-3.5" /> {profile.location} · {profile.citizenship}
+            </span>
+          </Motion.div>
+        </Motion.div>
+
+        {/* Legend for the 3D pipeline — names the node currently lit behind the page. */}
+        <Motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1 }}
+          className="mt-16 lg:mt-20"
+        >
+          <div className="mb-4 flex items-center gap-3">
+            <span className="meta text-dim">Pipeline</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-line to-transparent" />
+            <span className="meta text-teal">
+              active · {activeNode.label}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {NODES.map((n) => {
+              const on = n.id === activeNode.id;
+              return (
+                <span
+                  key={n.id}
+                  className={`flex items-center gap-2 border px-3 py-2 font-mono text-[11px] tracking-[0.06em] transition-all duration-500 ${
+                    on
+                      ? n.accent === 'amber'
+                        ? 'border-amber/50 bg-amber/10 text-amber'
+                        : 'border-teal/50 bg-teal/10 text-teal'
+                      : 'border-line bg-surface/40 text-dim'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-1.5 w-1.5 transition-colors duration-500 ${
+                      on ? (n.accent === 'amber' ? 'bg-amber' : 'bg-teal') : 'bg-line'
+                    }`}
+                  />
+                  {n.label}
+                </span>
+              );
+            })}
+          </div>
+        </Motion.div>
+
+        {/* Headline figures */}
+        <Motion.dl
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 1.2 }}
+          className="mt-12 grid grid-cols-2 gap-px border border-line bg-line lg:grid-cols-4"
+        >
+          {stats.map((s) => (
+            <div key={s.label} className="bg-void/70 px-5 py-6 backdrop-blur-sm">
+              <dd className="text-[30px] font-semibold leading-none tracking-[-0.03em] md:text-[40px]">
+                {s.value}
+                {s.unit ? <span className="text-[20px] text-muted md:text-[26px]">{s.unit}</span> : null}
+                {s.suffix ? <span className="text-teal">{s.suffix}</span> : null}
+              </dd>
+              <dt className="meta mt-3 text-dim">{s.label}</dt>
             </div>
-          </motion.div>
-
-        </motion.div>
+          ))}
+        </Motion.dl>
       </div>
     </section>
   );

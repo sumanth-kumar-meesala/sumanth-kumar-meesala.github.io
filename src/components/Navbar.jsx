@@ -1,90 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-scroll';
-import { motion } from 'framer-motion';
-import { Download, FileText } from 'lucide-react';
-import Magnet from './reactbits/Magnet';
+import { Menu, X } from 'lucide-react';
+import { profile } from '../data/resume';
 
-const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
+const links = [
+  { name: 'About', to: 'about', n: '002' },
+  { name: 'Stack', to: 'skills', n: '003' },
+  { name: 'Work', to: 'work', n: '004' },
+  { name: 'Experience', to: 'experience', n: '005' },
+  { name: 'Education', to: 'education', n: '006' },
+];
+
+const Navbar = ({ active }) => {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Home', to: 'home' },
-    { name: 'About', to: 'about' },
-    { name: 'Skills', to: 'skills' },
-    { name: 'Projects', to: 'projects' },
-    { name: 'Experience', to: 'experience' },
-  ];
-
   return (
-    <div className="fixed w-full z-50 top-0 flex justify-center mt-6 px-4 pointer-events-none">
-      <motion.nav
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className={`pointer-events-auto transition-all duration-500 rounded-full px-5 py-2.5 flex items-center gap-6 ${
-          isScrolled ? 'glass-nav shadow-lg shadow-black/50' : 'bg-transparent'
-        }`}
-      >
-        <Link
-          to="home"
-          smooth={true}
-          duration={500}
-          className="cursor-pointer text-xl font-bold tracking-tighter text-white flex items-center hover:opacity-80 transition-opacity"
-        >
-          S<span className="text-slate-400">M</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-secondary ml-1 mb-1" />
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        scrolled ? 'border-b border-line bg-void/80 backdrop-blur-md' : 'border-b border-transparent'
+      }`}
+    >
+      <div className="shell flex h-16 items-center justify-between md:h-[72px]">
+        <Link to="home" smooth duration={600} className="group flex cursor-pointer items-center gap-3">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping bg-teal opacity-60" />
+            <span className="relative inline-flex h-2 w-2 bg-teal" />
+          </span>
+          <span className="font-mono text-[12px] tracking-[0.1em] text-text md:text-[13px]">
+            SUMANTH<span className="text-dim">.</span>MEESALA
+          </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
-          {navLinks.slice(1).map((link) => (
+        <nav className="hidden items-center gap-1 md:flex">
+          {links.map((l) => (
             <Link
-              key={link.name}
-              to={link.to}
-              smooth={true}
-              duration={500}
-              spy={true}
-              activeClass="text-white"
-              className="cursor-pointer text-sm font-medium text-slate-400 hover:text-white transition-colors"
+              key={l.to}
+              to={l.to}
+              smooth
+              duration={600}
+              offset={-72}
+              className={`meta cursor-pointer px-3 py-2 transition-colors ${
+                active === l.to ? 'text-teal' : 'text-dim hover:text-text'
+              }`}
             >
-              {link.name}
+              {l.name}
             </Link>
           ))}
-        </div>
+          <Link
+            to="contact"
+            smooth
+            duration={700}
+            className="meta ml-3 cursor-pointer border border-teal/40 bg-teal/[0.07] px-4 py-2.5 text-teal transition-colors hover:bg-teal hover:text-void"
+          >
+            Contact
+          </Link>
+        </nav>
 
-        <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
-          <Magnet padding={20} magnetStrength={6}>
-            <a
-              href="/Sumanth_Resume.pdf"
-              download
-              aria-label="Download resume"
-              title="Download resume"
-              className="group inline-flex items-center justify-center w-9 h-9 rounded-full text-slate-300 hover:text-white bg-white/5 hover:bg-gradient-to-r hover:from-primary hover:to-secondary border border-white/10 hover:border-transparent transition-all"
-            >
-              <Download className="w-4 h-4" />
-            </a>
-          </Magnet>
-          <Magnet padding={20} magnetStrength={6}>
-            <a
-              href="/Sumanth_Detailed_CV.pdf"
-              download
-              aria-label="Download detailed CV"
-              title="Download detailed CV"
-              className="group inline-flex items-center justify-center w-9 h-9 rounded-full text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/50 transition-all"
-            >
-              <FileText className="w-4 h-4" />
-            </a>
-          </Magnet>
-        </div>
-      </motion.nav>
-    </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+          className="-mr-2 flex h-11 w-11 items-center justify-center text-text md:hidden"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </div>
+
+      {open ? (
+        <nav className="border-t border-line bg-void/95 backdrop-blur-md md:hidden">
+          <div className="shell flex flex-col py-2">
+            {[...links, { name: 'Contact', to: 'contact', n: '007' }].map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                smooth
+                duration={600}
+                offset={-64}
+                onClick={() => setOpen(false)}
+                className="meta flex h-12 cursor-pointer items-center gap-4 border-b border-line-2 text-dim last:border-b-0"
+              >
+                <span className="text-teal/70">{l.n}</span>
+                {l.name}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      ) : null}
+      <p className="sr-only">{profile.name} — {profile.role}</p>
+    </header>
   );
 };
 
