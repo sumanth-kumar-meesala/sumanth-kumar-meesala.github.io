@@ -30,6 +30,12 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Agent evals
+        # Golden questions, injection attempts, small talk, personal-data
+        # requests and output invariants. A regression here blocks the deploy.
+        run: npm test
       - name: Build
         run: npm run build
       - name: Setup Pages

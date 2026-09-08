@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUp } from 'lucide-react';
-import { answer, SUGGESTED } from '../agent/retriever';
+import { ArrowUp, ChevronRight } from 'lucide-react';
+import { ask as runAgent, SUGGESTED } from '../agent/pipeline';
 import { useTypewriter } from '../hooks/useTypewriter';
 
 let nextId = 1;
@@ -10,8 +10,9 @@ const OPENING = {
   intent: 'opening',
   parts: [
     {
-      text: 'Ask me anything a résumé should be able to answer — production work, stack, work rights, who Sumanth has mentored. Every sentence I say comes from the résumé and carries a citation you can click. If it isn’t in there, I say so.',
+      text: 'Ask me anything a résumé should be able to answer — production work, stack, work rights, who Sumanth has mentored. Every sentence I say comes from the résumé and carries a citation you can click. If it isn’t in there, I say so — and you can open “how I answered” under any reply to see each step.',
       cite: null,
+      meta: true,
     },
   ],
 };
@@ -22,6 +23,56 @@ const Cite = ({ cite }) =>
       {cite.label}
     </a>
   ) : null;
+
+const STATUS = {
+  passed: 'bg-signal',
+  warned: 'bg-amber-500',
+  blocked: 'bg-ink',
+  skipped: 'bg-line-2',
+  empty: 'bg-line-2',
+};
+
+/** "How I answered": the pipeline's own record of each step for this reply. */
+const Trace = ({ trace }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (open) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [open]);
+  if (!trace?.length) return null;
+  const last = trace[trace.length - 1];
+  const summary = trace
+    .filter((t) => t.name !== 'output check')
+    .map((t) => `${t.name} ${t.status}`)
+    .join(' · ');
+  return (
+    <div className="mt-3 font-mono text-[11px] leading-relaxed text-muted">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="inline-flex min-h-[28px] items-center gap-1.5 rounded px-1 -ml-1 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-moss"
+      >
+        <ChevronRight className={`h-3 w-3 transition-transform ${open ? 'rotate-90' : ''}`} aria-hidden="true" />
+        how I answered · {trace.length} steps · {last.ms} ms
+      </button>
+      {open ? (
+        <ol ref={ref} className="mt-1.5 flex flex-col gap-1 border-l border-line pl-3">
+          {trace.map((t, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className={`mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full ${STATUS[t.status] ?? 'bg-line-2'}`} aria-hidden="true" />
+              <span>
+                <span className="text-ink-2">{t.name}</span> — {t.detail}
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <span className="sr-only">{summary}</span>
+      )}
+    </div>
+  );
+};
 
 /** One agent turn: parts stream in as if generated, each followed by its citation. */
 const AgentMessage = ({ parts, stream, onSettled }) => {
@@ -59,6 +110,24 @@ const AgentMessage = ({ parts, stream, onSettled }) => {
   );
 };
 
+const AgentTurn = ({ m, settled }) => {
+  const [showTrace, setShowTrace] = useState(!m.stream);
+  const onSettled = useCallback(() => {
+    setShowTrace(true);
+    if (m.stream) settled();
+  }, [m.stream, settled]);
+  return (
+    <div className="flex flex-col">
+      <AgentMessage parts={m.parts} stream={m.stream} onSettled={onSettled} />
+      {showTrace && m.trace ? (
+        <div className="pl-[46px] md:pl-[48px]">
+          <Trace trace={m.trace} />
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 const UserMessage = ({ text }) => (
   <div className="flex justify-end">
     <div className="max-w-[85%] rounded-[14px_14px_4px_14px] bg-ink px-4 py-3 text-[15px] leading-snug text-paper md:max-w-[560px] md:text-[16px]">{text}</div>
@@ -73,6 +142,7 @@ const AskPanel = () => {
   const [messages, setMessages] = useState(() => [{ id: uid(), role: 'agent', ...OPENING, stream: false }]);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
+  const historyRef = useRef([]);
   const logRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -85,7 +155,8 @@ const AskPanel = () => {
     if (!q) return;
     setBusy(true);
     setDraft('');
-    const a = answer(q);
+    const a = runAgent(q, historyRef.current);
+    historyRef.current = [...historyRef.current.slice(-5), { query: q, tokens: a.tokens, intent: a.intent }];
     setMessages((m) => [
       ...m.map((x) => (x.stream ? { ...x, stream: false } : x)),
       { id: uid(), role: 'user', text: q },
@@ -108,7 +179,7 @@ const AskPanel = () => {
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="h-2 w-2 shrink-0 rounded-full bg-signal animate-pulse-dot" aria-hidden="true" />
           <span className="text-[14px] font-medium">Ask my résumé</span>
-          <span className="hidden truncate font-mono text-[11px] text-muted md:inline">· an agent grounded in the CV, every answer cited</span>
+          <span className="hidden truncate font-mono text-[11px] text-muted md:inline">· guardrails → retrieve → rerank → ground → cite</span>
         </div>
         <span className="hidden font-mono text-[11px] text-muted md:inline">runs in your browser · nothing is sent anywhere</span>
       </div>
@@ -122,7 +193,7 @@ const AskPanel = () => {
               </div>
             ) : (
               <div key={m.id} className="animate-rise">
-                <AgentMessage parts={m.parts} stream={m.stream} onSettled={m.stream ? settled : undefined} />
+                <AgentTurn m={m} settled={settled} />
               </div>
             ),
           )}

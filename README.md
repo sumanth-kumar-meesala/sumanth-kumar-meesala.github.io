@@ -26,23 +26,42 @@ rather scan than ask.
 ### How the agent works
 
 There is no model and no network call — the site is static on GitHub Pages and nothing a visitor
-types leaves their browser.
+types leaves their browser. What there *is* is the shape of a production LLM pipeline, each step
+visible under every reply as "how I answered":
 
-- `src/agent/knowledge.js` derives a list of **facts** from `src/data/resume.js`. Each fact is one
-  sentence with the words a question might use to reach it and the citation it resolves to
-  (a project, a role with its years, the Stack, Work rights…).
-- `src/agent/retriever.js` normalises the question (stop words, a synonym table so "visa" reaches
-  "sponsorship" and "QA" reaches "testing"), then tries three things in order: a small set of
-  **intents** for the questions recruiters actually ask (production agents, sponsorship, current role,
-  solo work, evals, mentoring, RAG, contact, summary…); a **skill lookup** ("does he know Python?");
-  and finally **keyword scoring** (idf-weighted overlap) against every fact. Below a confidence
-  threshold it answers "that's not in the résumé".
-- `src/components/AskPanel.jsx` renders the conversation and streams each answer character by
-  character (`useTypewriter`), instant under `prefers-reduced-motion`.
+1. **Input guardrails** (`src/agent/guardrails.js`) — prompt-injection patterns ("ignore previous
+   instructions", role-play, fake system tags, "reveal your prompt"), abuse, requests for personal
+   data a hiring process should not touch (age, family, religion, address…), out-of-scope tasks
+   (poems, general definitions, other people) and small talk. Everything blocked gets a plain,
+   cite-free reply; nothing blocked reaches retrieval.
+2. **Query understanding** (`src/agent/query.js`) — stop words, a synonym table ("visa" →
+   sponsorship, "QA" → testing), typo correction against the résumé's own vocabulary
+   ("featurs" → features), and follow-up resolution ("and at Archimedes?" inherits the previous
+   topic).
+3. **Routing + retrieval** (`src/agent/intents.js`, `src/agent/retrieve.js`) — a rule router
+   hand-orders answers for the questions recruiters actually ask; everything else goes to BM25
+   over the facts derived from `resume.js`.
+4. **Reranking** (`src/agent/rerank.js`) — candidates are rescored on lexical score, term
+   coverage, bigram overlap, recency and source weight, then selected with maximal marginal
+   relevance so an answer never repeats itself.
+5. **Grounding gate** — a confidence from coverage and margin decides whether to answer plainly,
+   answer with a caveat, or say "that is not in the résumé".
+6. **Composition** (`src/agent/compose.js`) — first-person résumé bullets are rewritten in the
+   third person; nothing else is added.
+7. **Output guardrails** — every sentence must carry a citation, every number in a cited sentence
+   must occur in the résumé corpus, and the reply is length-capped.
 
-Because the facts are generated from `resume.js`, updating the résumé updates the agent. If you add
-a new kind of question, add an intent in `retriever.js`; the test harness is simply calling
-`answer('…')` and reading the parts.
+`src/agent/knowledge.js` derives the **facts** from `src/data/resume.js`, each with the citation
+it resolves to, so updating the résumé updates the agent.
+
+### Evals
+
+`npm test` runs `src/agent/evals.test.js`: ~30 golden recruiter questions with expected route and
+citations, "not in the résumé" cases, prompt-injection attempts, small talk, personal-data and
+abusive input, a follow-up, and invariants over every input (every cited sentence is a real fact,
+every number is in the résumé, every trace starts with guardrails and ends with the output check,
+determinism, latency). The GitHub Pages workflow runs lint, evals and build in that order — a
+regression blocks the deploy.
 
 ## Design
 

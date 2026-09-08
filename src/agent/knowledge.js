@@ -86,6 +86,13 @@ experience.forEach((r) => {
   );
 });
 
+add(
+  'timeline',
+  experience.map((r) => `${r.company} (${r.role}, ${r.from.replace(' —', '')} – ${r.current ? 'present' : r.to})`).join('; ') + '.',
+  CITES.experience,
+  ['experience', 'timeline', 'career', 'companies', 'employers', 'history', 'teams'],
+);
+
 // --- Stack ---------------------------------------------------------------
 skillGroups.forEach((g) =>
   add(
