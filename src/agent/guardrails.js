@@ -3,7 +3,7 @@
 
 import { profile } from './knowledge';
 
-export const MAX_CHARS = 400;
+const MAX_CHARS = 400;
 
 /** Replace ASCII control characters with spaces (kept out of a regex literal for the linter). */
 const stripControl = (s) => Array.from(s, (ch) => (ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127 ? ' ' : ch)).join('');
@@ -60,11 +60,17 @@ const OUT_OF_SCOPE = [
   /^\s*(what|whats|what's) (is|are) (a |an |the )?(rag|llm|llms|mcp|agent|agents|transformer|langchain|langgraph|bedrock|react|angular|kubernetes|docker|aws)\b\s*\??\s*$/i,
 ];
 
+const OFF_CV = [
+  ['compensation', /\b(salary|salaries|pay|rate|compensation|package|money|remuneration|expectation)\b/i],
+  ['availability', /\b(notice period|notice|start date|(can|could|will) he start|start(ing)? (date|immediately|asap|soon)|available (from|to start|now)|availability|contract(or|ing)?\b|remote|hybrid|on-?site|relocat)/i],
+  ['weakness', /\b(weakness|weaknesses|flaws?|worst|failures?|failed|bad at|struggles?|negatives?)\b/i],
+];
+
 const OTHER_PERSON = /\b(elon|musk|altman|zuckerberg|obama|trump|biden|modi|einstein|my (friend|brother|sister|boss|colleague))\b/i;
 
 /**
  * Screen a question before retrieval.
- * verdict: 'ok' | 'empty' | 'inject' | 'abuse' | 'personal' | 'social' | 'scope'
+ * verdict: 'ok' | 'empty' | 'inject' | 'abuse' | 'personal' | 'social' | 'scope' | 'offcv'
  */
 export const screenInput = (raw) => {
   const q = stripControl(raw).trim();
@@ -79,6 +85,8 @@ export const screenInput = (raw) => {
   const social = SOCIAL.find(([, r]) => r.test(query));
   if (social) return { verdict: 'social', kind: social[0], query, truncated };
   if (hit(OUT_OF_SCOPE) || OTHER_PERSON.test(query)) return { verdict: 'scope', query, truncated };
+  const off = OFF_CV.find(([, r]) => r.test(query));
+  if (off && !/\b(sponsor|citizen|visa|rights)\b/i.test(query)) return { verdict: 'offcv', kind: off[0], query, truncated };
   return { verdict: 'ok', query, truncated };
 };
 
@@ -107,8 +115,25 @@ export const refusal = (screen) => {
       ];
     case 'social':
       return social(screen.kind);
+    case 'offcv':
+      return offCv(screen.kind, contact);
     default:
       return [{ text: 'That is not in the résumé, so I will not guess. ' + contact, meta: true }];
+  }
+};
+
+const offCv = (kind, contact) => {
+  switch (kind) {
+    case 'weakness':
+      return [
+        { text: 'The résumé does not cover weaknesses or failures, so I will not invent any.', meta: true },
+        { text: 'What it does say: he is strongest where unclear product requirements meet hard system constraints — which is also where things go wrong first.', meta: true },
+      ];
+    default:
+      return [
+        { text: 'That is not in the résumé — salary, notice period and working arrangements are for a conversation, not a document.', meta: true },
+        { text: `He is open to senior AI roles. ${contact}`, meta: true },
+      ];
   }
 };
 
@@ -143,6 +168,10 @@ const social = (kind) => {
 const MAX_ANSWER_CHARS = 1400;
 const NUMBER = /\d[\d.,]*[%k+]?/gi;
 
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Whole-number match: "25" must not pass because "81.25" is in the corpus. */
+const numberInCorpus = (n, corpus) => new RegExp(`(?<![\\d.])${escapeRe(n.toLowerCase())}(?![\\d])`).test(corpus);
+
 /**
  * Check an answer before it is shown:
  *  - every non-meta sentence must carry a citation (else it is dropped);
@@ -164,7 +193,7 @@ export const screenOutput = (parts, corpus) => {
       continue;
     }
     if (!p.meta) {
-      const bad = (text.match(NUMBER) ?? []).find((n) => !corpus.includes(n.toLowerCase()));
+      const bad = (text.match(NUMBER) ?? []).find((n) => !numberInCorpus(n, corpus));
       if (bad) {
         dropped.push(`unsupported number "${bad}"`);
         continue;

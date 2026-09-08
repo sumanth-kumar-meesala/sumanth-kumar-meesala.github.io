@@ -3,7 +3,7 @@
 
 import { facts } from './knowledge';
 
-export const SYNONYMS = {
+const SYNONYMS = {
   visa: 'sponsorship', sponsor: 'sponsorship', sponsored: 'sponsorship', pr: 'citizen', citizenship: 'citizen',
   rights: 'sponsorship', relocate: 'location', relocation: 'location', where: 'location', lives: 'location', living: 'location',
   gpt: 'openai', chatgpt: 'openai', llms: 'llm', models: 'llm', model: 'llm', genai: 'llm', ai: 'llm',
@@ -29,8 +29,8 @@ export const SYNONYMS = {
   weakness: 'weakness', weaknesses: 'weakness', bad: 'weakness', worst: 'weakness', fail: 'weakness', failed: 'weakness', failure: 'weakness',
 };
 
-export const STOP = new Set(
-  'a an the and or of to in on at for with by is are was were be been does do did has have had he his him this that these those it its can could would should will what which how why when much many any some about tell me show give please just really actually ever also than then there their they them from as into over under vs versus like anything something got get did work worked'.split(' '),
+const STOP = new Set(
+  'whats whos hows a an the and or of to in on at for with by is are was were be been does do did has have had he his him this that these those it its can could would should will what which how why when much many any some about tell me show give please just really actually ever also than then there their they them from as into over under vs versus like anything something got get did work worked'.split(' '),
 );
 
 const rawTokens = (q) =>
@@ -69,7 +69,7 @@ const editDistance = (a, b) => {
 };
 
 /** Nearest vocabulary word within one edit (two for long words), or null. */
-export const correct = (t) => {
+const correct = (t) => {
   if (t.length < 5 || VOCAB.has(t) || STOP.has(t) || SYNONYMS[t]) return null;
   const limit = t.length >= 8 ? 2 : 1;
   let best = null;

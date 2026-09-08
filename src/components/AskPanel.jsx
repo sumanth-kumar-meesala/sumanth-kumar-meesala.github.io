@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUp, ChevronRight } from 'lucide-react';
 import { ask as runAgent, SUGGESTED } from '../agent/pipeline';
+import { ENDPOINT } from '../agent/generate';
+
+const HAS_MODEL = Boolean(ENDPOINT);
+const MODEL_NOTE = HAS_MODEL ? 'gpt-oss-120b via Groq' : 'runs in your browser · nothing is sent anywhere';
 import { useTypewriter } from '../hooks/useTypewriter';
 
 let nextId = 1;
@@ -110,12 +114,24 @@ const AgentMessage = ({ parts, stream, onSettled }) => {
   );
 };
 
+const Thinking = () => (
+  <div className="flex gap-3.5 md:gap-4" aria-label="Thinking">
+    <span aria-hidden="true" className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-forest font-sans text-[12px] font-semibold text-mint">S</span>
+    <span className="mt-2 inline-flex items-center gap-1.5" aria-hidden="true">
+      <span className="h-1.5 w-1.5 rounded-full bg-moss animate-blink" />
+      <span className="h-1.5 w-1.5 rounded-full bg-moss animate-blink [animation-delay:200ms]" />
+      <span className="h-1.5 w-1.5 rounded-full bg-moss animate-blink [animation-delay:400ms]" />
+    </span>
+  </div>
+);
+
 const AgentTurn = ({ m, settled }) => {
   const [showTrace, setShowTrace] = useState(!m.stream);
   const onSettled = useCallback(() => {
     setShowTrace(true);
     if (m.stream) settled();
   }, [m.stream, settled]);
+  if (m.pending) return <Thinking />;
   return (
     <div className="flex flex-col">
       <AgentMessage parts={m.parts} stream={m.stream} onSettled={onSettled} />
@@ -150,18 +166,21 @@ const AskPanel = () => {
   const prompts = useMemo(() => SUGGESTED.filter((s) => !asked.has(s)).slice(0, busy ? 0 : 4), [asked, busy]);
 
   // Asking mid-stream is allowed: the previous answer simply finishes at once.
-  const ask = useCallback((text) => {
+  const ask = useCallback(async (text) => {
     const q = text.trim();
     if (!q) return;
     setBusy(true);
     setDraft('');
-    const a = runAgent(q, historyRef.current);
-    historyRef.current = [...historyRef.current.slice(-5), { query: q, tokens: a.tokens, intent: a.intent }];
+    const pendingId = uid();
     setMessages((m) => [
       ...m.map((x) => (x.stream ? { ...x, stream: false } : x)),
       { id: uid(), role: 'user', text: q },
-      { id: uid(), role: 'agent', ...a, stream: true },
+      { id: pendingId, role: 'agent', pending: true, parts: [] },
     ]);
+    const a = await runAgent(q, historyRef.current);
+    const answerText = a.parts.map((p) => p.text).join(' ');
+    historyRef.current = [...historyRef.current.slice(-5), { query: q, answer: answerText, tokens: a.tokens, intent: a.intent }];
+    setMessages((m) => m.map((x) => (x.id === pendingId ? { id: pendingId, role: 'agent', ...a, stream: true } : x)));
   }, []);
 
   const settled = useCallback(() => setBusy(false), []);
@@ -178,10 +197,10 @@ const AskPanel = () => {
       <div className="flex items-center justify-between gap-4 border-b border-line px-6 py-4 md:px-10">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="h-2 w-2 shrink-0 rounded-full bg-signal animate-pulse-dot" aria-hidden="true" />
-          <span className="text-[14px] font-medium">Ask my résumé</span>
-          <span className="hidden truncate font-mono text-[11px] text-muted md:inline">· guardrails → retrieve → rerank → ground → cite</span>
+          <span className="whitespace-nowrap text-[14px] font-medium">Ask my résumé</span>
+          <span className="hidden truncate font-mono text-[11px] text-muted lg:inline">· guardrails → retrieve → rerank → generate → verify</span>
         </div>
-        <span className="hidden font-mono text-[11px] text-muted md:inline">runs in your browser · nothing is sent anywhere</span>
+        <span className="hidden whitespace-nowrap font-mono text-[11px] text-muted md:inline">{MODEL_NOTE}</span>
       </div>
 
       <div ref={logRef} role="log" aria-live="polite" aria-relevant="additions" className="flex-1 overflow-y-auto px-6 py-8 md:px-10">
@@ -245,7 +264,8 @@ const AskPanel = () => {
             </button>
           </form>
           <p className="font-mono text-[11px] leading-relaxed text-muted">
-            Answers come only from the résumé and linked projects. If it isn't in there, the agent says so.
+            Answers are grounded in the résumé and every sentence is checked against it. If it isn't in there, the agent says so.{' '}
+            {HAS_MODEL ? 'Your question and the retrieved facts are sent to the model; nothing is stored.' : 'Everything runs in your browser.'}
           </p>
         </div>
       </div>

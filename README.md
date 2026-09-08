@@ -25,43 +25,65 @@ rather scan than ask.
 
 ### How the agent works
 
-There is no model and no network call — the site is static on GitHub Pages and nothing a visitor
-types leaves their browser. What there *is* is the shape of a production LLM pipeline, each step
-visible under every reply as "how I answered":
+The page runs a real LLM pipeline. Everything except the model runs in the visitor's browser and
+every step is visible under each reply as "how I answered":
 
 1. **Input guardrails** (`src/agent/guardrails.js`) — prompt-injection patterns ("ignore previous
    instructions", role-play, fake system tags, "reveal your prompt"), abuse, requests for personal
-   data a hiring process should not touch (age, family, religion, address…), out-of-scope tasks
-   (poems, general definitions, other people) and small talk. Everything blocked gets a plain,
-   cite-free reply; nothing blocked reaches retrieval.
-2. **Query understanding** (`src/agent/query.js`) — stop words, a synonym table ("visa" →
-   sponsorship, "QA" → testing), typo correction against the résumé's own vocabulary
-   ("featurs" → features), and follow-up resolution ("and at Archimedes?" inherits the previous
-   topic).
-3. **Routing + retrieval** (`src/agent/intents.js`, `src/agent/retrieve.js`) — a rule router
-   hand-orders answers for the questions recruiters actually ask; everything else goes to BM25
-   over the facts derived from `resume.js`.
-4. **Reranking** (`src/agent/rerank.js`) — candidates are rescored on lexical score, term
-   coverage, bigram overlap, recency and source weight, then selected with maximal marginal
-   relevance so an answer never repeats itself.
-5. **Grounding gate** — a confidence from coverage and margin decides whether to answer plainly,
-   answer with a caveat, or say "that is not in the résumé".
-6. **Composition** (`src/agent/compose.js`) — first-person résumé bullets are rewritten in the
-   third person; nothing else is added.
-7. **Output guardrails** — every sentence must carry a citation, every number in a cited sentence
-   must occur in the résumé corpus, and the reply is length-capped.
+   data a hiring process should not touch, salary/notice questions the résumé cannot answer,
+   out-of-scope tasks and small talk. Everything blocked gets a plain, cite-free reply and
+   **never reaches the model**.
+2. **Query understanding** (`src/agent/query.js`) — stop words, a synonym table, typo correction
+   against the résumé's own vocabulary, follow-up resolution ("and at Archimedes?").
+3. **Routing + retrieval** (`src/agent/intents.js`, `src/agent/retrieve.js`) — a rule router picks
+   the facts for the questions recruiters actually ask; BM25 (idf-weighted coverage) over the facts
+   derived from `resume.js` covers everything else.
+4. **Reranking** (`src/agent/rerank.js`) — candidates rescored on lexical score, coverage, bigram
+   overlap, recency and source weight, selected with maximal marginal relevance.
+5. **Generation** (`src/agent/generate.js` → `proxy/`) — the question, the last three turns and up
+   to ten retrieved facts go to a Cloudflare Worker that holds the Groq key and a pinned system
+   prompt. The model is `openai/gpt-oss-120b`, with `llama-3.3-70b-versatile` as fallback on rate
+   limits or outages. It must cite facts as `[n]`; the page maps those back to citation chips.
+   If the proxy is unreachable or not configured, `src/agent/compose.js` composes an answer locally
+   from the same facts.
+6. **Output guardrails** — sentences without a citation are kept but marked; any sentence whose
+   number does not occur in the résumé is dropped (whole-number match, so "25" does not pass
+   because "81.25" exists); dangling `[n]` references are removed; the reply is length-capped.
 
 `src/agent/knowledge.js` derives the **facts** from `src/data/resume.js`, each with the citation
 it resolves to, so updating the résumé updates the agent.
 
+### The proxy and the key
+
+The site is static, so the Groq key cannot live in the frontend. It lives in **GitHub Actions
+secrets** and is pushed to the worker at deploy time; it never enters the repository.
+
+One-time setup:
+
+1. Create a free Cloudflare account, note the **Account ID** (Workers & Pages overview), and
+   create an **API token** with the "Edit Cloudflare Workers" template.
+2. In the GitHub repo → Settings → Secrets and variables → Actions, add three **secrets**:
+   `GROQ_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+3. Run the **Deploy Groq proxy** workflow (Actions tab → Run workflow). It prints the worker URL,
+   e.g. `https://ask-sumanth.<account>.workers.dev`.
+4. Add that URL as the repository **variable** `VITE_ASK_ENDPOINT` and re-run the Pages deploy.
+
+The worker (`proxy/src/worker.js`) only accepts POSTs from the origins listed in
+`proxy/wrangler.toml`, caps question/fact/history sizes, and returns 429 with `Retry-After` when
+both models are rate limited. Rotate the key in the Groq console if it is ever shared.
+
+Locally: copy `.env.example` to `.env`, set `VITE_ASK_ENDPOINT`, and `npm run dev`. Without it
+the agent answers in local mode.
+
 ### Evals
 
-`npm test` runs `src/agent/evals.test.js`: ~30 golden recruiter questions with expected route and
-citations, "not in the résumé" cases, prompt-injection attempts, small talk, personal-data and
-abusive input, a follow-up, and invariants over every input (every cited sentence is a real fact,
-every number is in the résumé, every trace starts with guardrails and ends with the output check,
-determinism, latency). The GitHub Pages workflow runs lint, evals and build in that order — a
-regression blocks the deploy.
+`npm test` runs two suites. `src/agent/evals.test.js`: golden recruiter questions with expected
+route and citations, "not in the résumé" cases, prompt injection (asserted to never reach the
+generator), small talk, personal-data and abusive input, follow-ups, a **model mode** with a fake
+generator (citation mapping, dangling references, invented numbers dropped, markdown stripped,
+fallback when the model fails), and invariants over every input. `proxy/worker.test.js`: CORS,
+validation, size caps, model fallback and key handling with Groq stubbed. The Pages workflow runs
+lint → evals → build, so a regression blocks the deploy.
 
 ## Design
 
@@ -87,6 +109,7 @@ and the agent both render from it and hold no copy of their own.
 - Tailwind CSS 3
 - Framer Motion (scroll reveals)
 - lucide-react
+- Cloudflare Worker + Groq (`openai/gpt-oss-120b`) for generation
 
 ## Run locally
 

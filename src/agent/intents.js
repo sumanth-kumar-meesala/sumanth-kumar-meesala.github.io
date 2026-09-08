@@ -1,219 +1,137 @@
-// Rule-based router for the questions recruiters actually ask. When a rule
-// fires it supplies an ordered, hand-composed set of facts; when none fires
-// the pipeline falls back to ranked retrieval. Every part still cites.
+// Rule router for the questions recruiters ask most. A rule that fires
+// returns the facts that answer it, in the order they should be read; the
+// generator (or the local composer) turns them into prose.
 
-import { byId, bullet, CITES, profile, experience, skillGroups, workRights } from './knowledge';
-import { scoreFacts } from './retrieve';
-
-// --- intents --------------------------------------------------------------
-// Each intent: `when` tests the normalised tokens; `answer` returns parts.
-// A part is { text, cite } — text is spoken, cite is shown beside it.
+import { byId, bullet, experience, skillGroups } from './knowledge';
 
 const has = (toks, ...words) => words.some((w) => toks.includes(w));
-const part = (fact, text) => (fact ? { text: text ?? fact.text, cite: fact.cite } : null);
-const parts = (...ps) => ps.filter(Boolean);
+const list = (...fs) => fs.filter(Boolean);
 
-const affle = experience.find((e) => e.company === 'Affle');
+const COMPANY = {
+  dashanalysis: 'dashanalysis', dash: 'dashanalysis', blaque: 'blaque', fracture: 'blaque',
+  archimedes: 'archimedes', blockfreight: 'blockfreight', contenterra: 'contenterra',
+};
 
-const COMPANY = { dashanalysis: 'dashanalysis', dash: 'dashanalysis', blaque: 'blaque', fracture: 'blaque', archimedes: 'archimedes', blockfreight: 'blockfreight', contenterra: 'contenterra' };
-
-export const INTENTS = [
+const INTENTS = [
   {
-    id: 'company',
-    when: (t) => t.some((x) => COMPANY[x]),
-    answer: (t) => {
-      const key = t.find((x) => COMPANY[x]);
-      const r = experience.find((e) => e.company.toLowerCase().startsWith(COMPANY[key]));
-      if (!r) return [];
-      return parts(part(byId(`${r.company}-role`)), ...r.bullets.slice(0, 3).map((_, i) => part(byId(`${r.company}-b${i}`))));
-    },
-  },
-  {
-    id: 'compensation',
-    when: (t) => has(t, 'compensation', 'availability') && !has(t, 'sponsorship', 'citizen'),
-    answer: () =>
-      parts(
-        { text: 'That is not in the résumé — salary, notice period and working arrangements are for a conversation, not a document.', cite: null },
-        { text: `He is open to senior AI roles; the fastest route is an email to ${profile.email}.`, cite: CITES.contact },
-      ),
-  },
-  {
-    id: 'weakness',
-    when: (t) => has(t, 'weakness'),
-    answer: () =>
-      parts(
-        { text: 'The résumé does not cover weaknesses or failures, so this agent will not invent any.', cite: null },
-        { text: 'What it does say: he is strongest where unclear product requirements meet hard system constraints — which is also where things go wrong first.', cite: CITES.profile },
-      ),
+    id: 'name',
+    when: (t) => has(t, 'name', 'called', 'surname'),
+    facts: () => list(byId('name')),
   },
   {
     id: 'education',
     when: (t) => has(t, 'education', 'deakin', 'wam'),
-    answer: () => parts(part(byId('edu-0')), part(byId('edu-1'))),
+    facts: () => list(byId('edu-0'), byId('edu-1')),
   },
   {
     id: 'rights',
     when: (t) => has(t, 'sponsorship', 'citizen', 'australia', 'melbourne') || (has(t, 'location') && !has(t, 'stack', 'education')),
-    answer: () => parts({ text: `No sponsorship needed. ${workRights.title} with ${workRights.body.charAt(0).toLowerCase()}${workRights.body.slice(1)}`, cite: CITES.rights }),
+    facts: () => list(byId('rights')),
   },
   {
     id: 'contact',
     when: (t) => has(t, 'contact', 'linkedin', 'github'),
-    answer: () =>
-      parts(
-        { text: `Email ${profile.email} — that is the fastest route.`, cite: CITES.contact },
-        { text: `He is also on LinkedIn (${profile.linkedinLabel}) and GitHub (${profile.githubLabel}), and the résumé PDF is one click away in the sidebar.`, cite: CITES.contact },
-      ),
+    facts: () => list(byId('contact'), byId('rights')),
   },
   {
     id: 'summary',
     when: (t) => has(t, 'summary') || (has(t, 'who') && t.length <= 2),
-    answer: () =>
-      parts(
-        part(byId('lead')),
-        part(byId('sub')),
-        { text: `${workRights.title}, based in ${profile.location}.`, cite: CITES.rights },
-      ),
+    facts: () => list(byId('name'), byId('lead'), byId('sub'), byId('rights')),
   },
   {
     id: 'production-agents',
     when: (t) => has(t, 'production') && has(t, 'agent', 'llm'),
-    answer: () =>
-      parts(
-        { text: 'Production, and still running.', cite: null },
-        part(bullet('Affle', 'Blueprix'), `At Affle he is a core contributor to Blueprix, a state-machine-based, MCP-enabled agent-orchestration platform — he built its MCP servers and tool integration, multi-agent orchestration and checkpoint/resume state handling, and standardised model access on Amazon Bedrock.`),
-        part(bullet('DashAnalysis', 'LangGraph')),
-        part(byId('Content Factory-body-0'), 'He also runs one alone: Content Factory, an autonomous video pipeline on the Claude Agent SDK that has reached 600K+ views.'),
-      ),
+    facts: () => list(bullet('Affle', 'Blueprix'), bullet('DashAnalysis', 'LangGraph'), byId('Content Factory-body-0'), byId('Content Factory-figures')),
   },
   {
     id: 'current',
     when: (t) => has(t, 'affle', 'current') && !has(t, 'previous', 'before', 'earlier'),
-    answer: () =>
-      parts(
-        { text: `${affle.role} at Affle, Melbourne, since ${affle.from.replace(' —', '')}.`, cite: CITES.role(affle) },
-        part(bullet('Affle', 'Blueprix')),
-        part(bullet('Affle', 'Qrank')),
-        part(bullet('Affle', 'Mentor')),
-      ),
+    facts: () => list(byId('Affle-role'), bullet('Affle', 'Blueprix'), bullet('Affle', 'Qrank'), bullet('Affle', 'Mentor')),
+  },
+  {
+    id: 'company',
+    when: (t) => t.some((x) => COMPANY[x]),
+    facts: (t) => {
+      const r = experience.find((e) => e.company.toLowerCase().startsWith(COMPANY[t.find((x) => COMPANY[x])]));
+      return r ? list(byId(`${r.company}-role`), ...r.bullets.slice(0, 4).map((_, i) => byId(`${r.company}-b${i}`))) : [];
+    },
   },
   {
     id: 'solo',
     when: (t) => has(t, 'alone', 'content', 'factory', 'youtube'),
-    answer: () =>
-      parts(
-        part(byId('Content Factory-what'), 'Content Factory — an autonomous video pipeline he founded, built and runs alone.'),
-        part(byId('Content Factory-body-0')),
-        part(byId('Content Factory-figures')),
-      ),
+    facts: () => list(byId('Content Factory-what'), byId('Content Factory-body-0'), byId('Content Factory-figures')),
   },
   {
     id: 'evals',
     when: (t) => has(t, 'eval', 'testing', 'guardrails', 'observability', 'langfuse', 'tracing'),
-    answer: () =>
-      parts(
-        part(bullet('Affle', 'evaluation and observability')),
-        part(bullet('DashAnalysis', 'guardrail')),
-        part(bullet('DashAnalysis', 'Jest')),
-      ),
+    facts: () => list(bullet('Affle', 'evaluation and observability'), bullet('DashAnalysis', 'guardrail'), bullet('DashAnalysis', 'Jest'), byId('skills-08')),
   },
   {
     id: 'mentoring',
     when: (t) => has(t, 'mentoring', 'leadership', 'team', 'junior', 'review', 'reviews'),
-    answer: () =>
-      parts(
-        part(bullet('Affle', 'Mentor')),
-        part(bullet('DashAnalysis', 'Mentored')),
-        part(bullet('ContenTerra', 'mentored')),
-      ),
+    facts: () => list(bullet('Affle', 'Mentor'), bullet('DashAnalysis', 'Mentored'), bullet('ContenTerra', 'mentored'), byId('skills-11')),
   },
   {
     id: 'rag',
     when: (t) => has(t, 'rag', 'langchain', 'llamaindex', '40%', '40'),
-    answer: () =>
-      parts(
-        part(bullet('DashAnalysis', 'RAG')),
-        part(bullet('Affle', 'RAG context'), 'At Affle that carries into Blueprix, where he built the RAG context management and standardised embeddings on Amazon Bedrock (Titan Embeddings).'),
-        part(byId('skills-03')),
-      ),
+    facts: () => list(bullet('DashAnalysis', 'RAG'), bullet('Affle', 'RAG context'), byId('skills-03')),
   },
   {
     id: 'qrank',
     when: (t) => has(t, 'qrank', 'review', '360'),
-    answer: () => parts(part(byId('Qrank-what')), part(byId('Qrank-body-0')), part(byId('Qrank-body-1'))),
+    facts: () => list(byId('Qrank-what'), byId('Qrank-body-0'), byId('Qrank-body-1'), byId('Qrank-figures')),
   },
   {
     id: 'blueprix',
     when: (t) => has(t, 'blueprix', 'mcp'),
-    answer: () => parts(part(byId('Blueprix-what')), part(byId('Blueprix-body-0')), part(byId('Blueprix-body-1'))),
+    facts: () => list(byId('Blueprix-what'), byId('Blueprix-body-0'), byId('Blueprix-body-1')),
   },
   {
     id: 'aws',
     when: (t) => has(t, 'aws', 'bedrock', 'ci', 'cd', 'ci/cd', 'cdk', 'docker', 'pipelines'),
-    answer: () =>
-      parts(
-        part(byId('skills-06')),
-        part(bullet('Affle', 'CI/CD')),
-        part(bullet('DashAnalysis', 'Moose')),
-      ),
+    facts: () => list(byId('skills-06'), bullet('Affle', 'CI/CD'), bullet('DashAnalysis', 'Moose')),
   },
   {
     id: 'experience',
     when: (t) => has(t, 'experience') && t.length <= 2 && !has(t, 'stack', 'llm', 'agent', 'rag', 'react', 'aws'),
-    answer: () =>
-      parts(
-        part(byId('stat-0'), 'Eleven-plus years in production, February 2015 to today, across six teams.'),
-        part(byId('timeline')),
-        part(byId('about-0')),
-      ),
+    facts: () => list(byId('stat-0'), byId('timeline'), byId('about-0')),
   },
   {
     id: 'stack',
     when: (t) => has(t, 'stack'),
-    answer: (t) => {
-      // A specific technology named? Answer about it; otherwise the headline groups.
+    facts: (t) => {
       const named = skillGroups.filter((g) => g.items.some((it) => t.some((tok) => tok.length > 1 && it.toLowerCase().includes(tok))));
-      if (named.length && t.length > 1) {
-        return parts(...named.slice(0, 3).map((g) => part(byId(`skills-${g.n}`))));
-      }
-      return parts(part(byId('skills-01')), part(byId('skills-03')), part(byId('skills-05')), part(byId('skills-06')));
+      const groups = named.length && t.length > 1 ? named.slice(0, 3) : skillGroups.filter((g) => g.emphasis).concat(skillGroups.slice(4, 6));
+      return list(...groups.map((g) => byId(`skills-${g.n}`)));
     },
   },
 ];
 
-// Skill-group lookup: "what databases / testing / security has he done?"
+// Skill-group and single-technology lookups: "what databases?", "does he know Python?"
 const GROUP_WORDS = new Set(['data', 'testing', 'security', 'observability', 'leadership', 'cloud', 'languages']);
-export const groupAnswer = (toks) => {
-  const hit = skillGroups.find((g) => g.title.toLowerCase().split(/\W+/).some((w) => GROUP_WORDS.has(w) && toks.includes(w)));
-  if (!hit) return null;
-  const ps = [part(byId(`skills-${hit.n}`))];
-  const top = scoreFacts(toks.join(' ')).find((x) => /-b\d+$/.test(x.f.id));
-  if (top) ps.push(part(top.f));
-  return ps;
-};
 
-// Technology lookup: "does he know Python / Angular / Playwright?"
-export const techAnswer = (toks) => {
+const lookupFacts = (toks) => {
+  const group = skillGroups.find((g) => g.title.toLowerCase().split(/\W+/).some((w) => GROUP_WORDS.has(w) && toks.includes(w)));
+  if (group) return { id: `group:${group.n}`, facts: list(byId(`skills-${group.n}`)) };
   const hits = [];
   for (const g of skillGroups) {
     for (const it of g.items) {
       const il = it.toLowerCase();
-      if (toks.some((t) => t.length > 2 && (il === t || il.split(/[\s/(),.]+/).includes(t)))) hits.push({ g, it });
+      if (toks.some((t) => t.length > 2 && (il === t || il.split(/[\s/(),.]+/).includes(t)))) hits.push(g);
     }
   }
-  if (!hits.length) return null;
-  const seen = new Set();
-  const ps = [];
-  for (const { g, it } of hits) {
-    if (seen.has(g.n)) continue;
-    seen.add(g.n);
-    ps.push({ text: `Yes — ${it} is in his ${g.title} set, alongside ${g.items.filter((x) => x !== it).slice(0, 5).join(', ')}.`, cite: CITES.stack });
-    if (ps.length === 2) break;
+  const groups = [...new Set(hits)].slice(0, 2);
+  return groups.length ? { id: `tech:${groups.map((g) => g.n).join('+')}`, facts: list(...groups.map((g) => byId(`skills-${g.n}`))) } : null;
+};
+
+/** Route a token list: { id, facts } or null. */
+export const route = (toks) => {
+  const intent = INTENTS.find((i) => i.when(toks));
+  if (intent) {
+    const facts = intent.facts(toks);
+    if (facts.length) return { id: intent.id, facts };
   }
-  // Add the strongest bullet that mentions it, if any.
-  const top = scoreFacts(toks.join(' ')).find((x) => /-b\d+$/.test(x.f.id));
-  if (top) ps.push(part(top.f));
-  return ps;
+  return lookupFacts(toks);
 };
 
 export const SUGGESTED = [

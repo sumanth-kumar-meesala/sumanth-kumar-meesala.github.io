@@ -21,7 +21,7 @@ const roleYears = (role) => `${role.from.replace(/\s*—\s*$/, '').replace(/^[A-
   role.current ? '' : role.to.replace(/^[A-Za-z]{3}\s/, '')
 }`;
 
-export const CITES = {
+const CITES = {
   profile: cite('Profile', 'top'),
   rights: cite('Work rights', 'education'),
   contact: cite('Contact', 'contact'),
@@ -41,6 +41,7 @@ export const facts = [];
 const add = (id, text, c, keys, weight = 1) => facts.push({ id, text, cite: c, keys, weight });
 
 // --- Profile -------------------------------------------------------------
+add('name', `${profile.name} — ${profile.role}, ${profile.discipline}; based in ${profile.location}.`, CITES.profile, ['name', 'called', 'surname', 'sumanth', 'meesala', 'kumar', 'title', 'role'], 1.2);
 add('lead', profile.lead, CITES.profile, ['summary', 'overview', 'who', 'about', 'background', 'experience', 'years', 'senior', 'engineer'], 1.2);
 add('sub', profile.sub, CITES.profile, ['affle', 'blueprix', 'qrank', 'mentor', 'current', 'now'], 1);
 add(
@@ -128,6 +129,4 @@ export const bullet = (company, ...words) => {
   return i >= 0 ? byId(`${r.company}-b${i}`) : null;
 };
 
-export const project = (name) => work.find((w) => w.name.toLowerCase() === name.toLowerCase());
-
-export { profile, experience, skillGroups, workRights, education, work };
+export { profile, experience, skillGroups, workRights };

@@ -37,6 +37,9 @@ jobs:
         # requests and output invariants. A regression here blocks the deploy.
         run: npm test
       - name: Build
+        env:
+          # Worker URL from deploy-proxy.yml; leave unset to ship the local fallback only.
+          VITE_ASK_ENDPOINT: ${{ vars.VITE_ASK_ENDPOINT }}
         run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4

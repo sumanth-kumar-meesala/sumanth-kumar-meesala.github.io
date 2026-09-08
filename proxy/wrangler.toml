@@ -1,0 +1,14 @@
+# Cloudflare Worker that holds the Groq key and answers for the portfolio.
+# Deployed by .github/workflows/deploy-proxy.yml — never run with a key on disk.
+name = "ask-sumanth"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Origins allowed to call this worker (comma-separated). Everything else gets 403.
+ALLOWED_ORIGINS = "https://sumanth-kumar-meesala.github.io,http://localhost:5173,http://localhost:4173"
+PRIMARY_MODEL = "openai/gpt-oss-120b"
+FALLBACK_MODEL = "llama-3.3-70b-versatile"
+
+# Secrets (set by the workflow, never committed):
+#   GROQ_API_KEY

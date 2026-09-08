@@ -1,6 +1,6 @@
 // Lexical retrieval over the facts: BM25 with idf, term-frequency saturation
-// and length normalisation. `scoreFacts` keeps the older simple interface for
-// the rule router; `retrieve` is what the pipeline calls.
+// and length normalisation. Coverage is idf-weighted, so missing the one
+// informative word in a question ("name") costs more than missing "full".
 
 import { facts } from './knowledge';
 import { tokenize, stem } from './query';
@@ -24,10 +24,10 @@ for (const f of facts) {
 const avgLen = totalLen / facts.length;
 const N = facts.length;
 
-export const idf = (t) => Math.log(1 + (N - (df.get(t) ?? 0) + 0.5) / ((df.get(t) ?? 0) + 0.5));
+const idf = (t) => Math.log(1 + (N - (df.get(t) ?? 0) + 0.5) / ((df.get(t) ?? 0) + 0.5));
 
 /** Query terms worth scoring: stemmed, deduplicated, not ubiquitous. */
-export const contentTerms = (tokens) => [...new Set(tokens.map(stem))].filter((t) => (df.get(t) ?? 0) <= N * 0.2);
+const contentTerms = (tokens) => [...new Set(tokens.map(stem))].filter((t) => (df.get(t) ?? 0) <= N * 0.2);
 
 const bm25 = (factId, terms) => {
   const { tf, len } = index.get(factId);
@@ -49,19 +49,14 @@ const bm25 = (factId, terms) => {
 export const retrieve = (tokens, k = 12) => {
   const terms = contentTerms(tokens);
   if (!terms.length) return { terms, candidates: [] };
+  const totalIdf = terms.reduce((a, t) => a + idf(t), 0) || 1;
   const candidates = [];
   for (const f of facts) {
     const { s, matched } = bm25(f.id, terms);
-    if (s > 0) candidates.push({ f, bm25: s * f.weight, matched, coverage: matched.length / terms.length });
+    if (s > 0) candidates.push({ f, bm25: s * f.weight, matched, coverage: matched.reduce((a, t) => a + idf(t), 0) / totalIdf });
   }
   candidates.sort((a, b) => b.bm25 - a.bm25);
   return { terms, candidates: candidates.slice(0, k) };
-};
-
-/** Older interface used by the rule router: [{ f, s }] for a raw query string. */
-export const scoreFacts = (query) => {
-  const { candidates } = retrieve(tokenize(query), 20);
-  return candidates.map(({ f, bm25: s }) => ({ f, s }));
 };
 
 /** Every fact's text, lower-cased, for the output faithfulness check. */
