@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 
-/**
- * Reports which section id currently owns the viewport.
- * Drives both the nav highlight and which 3D node is lit.
- */
+/** Reports which section id currently owns the viewport; drives the rail nav. */
 export function useActiveSection(ids, offset = 0.42) {
   const [active, setActive] = useState(ids[0]);
 

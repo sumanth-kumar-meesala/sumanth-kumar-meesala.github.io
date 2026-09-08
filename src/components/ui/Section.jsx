@@ -1,59 +1,41 @@
 import React from 'react';
 import { motion as Motion } from 'framer-motion';
-import Figure from './Figure3D';
 
-export const Reveal = ({ children, delay = 0, y = 22, className = '' }) => (
+export const Reveal = ({ children, delay = 0, y = 18, className = '' }) => (
   <Motion.div
     initial={{ opacity: 0, y }}
     whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: '-80px' }}
-    transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+    viewport={{ once: true, margin: '-60px' }}
+    transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
     className={className}
   >
     {children}
   </Motion.div>
 );
 
-/**
- * Section masthead: index, label and title on the left, the section's
- * 3D figure on the right. The figure is the section's subject in object form.
- */
-export const SectionHead = ({ index, label, title, lead, figure }) => (
-  <div className="mb-12 grid grid-cols-1 gap-x-10 gap-y-10 lg:mb-16 lg:grid-cols-12">
-    <div className="lg:col-span-7">
-      <Reveal>
-        <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="meta text-teal">[ {index} ]</span>
-          <span className="meta text-dim">{label}</span>
-          <span className="hidden h-px flex-1 bg-gradient-to-r from-line to-transparent sm:block" />
-        </div>
-      </Reveal>
-      <Reveal delay={0.06}>
-        <h2 className="balance text-[30px] font-semibold leading-[1.08] tracking-[-0.03em] md:text-[40px] lg:text-[46px]">
-          {title}
-        </h2>
-      </Reveal>
-      {lead ? (
-        <Reveal delay={0.12}>
-          <p className="pretty mt-5 max-w-xl text-[15px] leading-relaxed text-muted md:text-base">{lead}</p>
-        </Reveal>
-      ) : null}
-    </div>
-
-    {figure ? (
-      <Reveal delay={0.14} className="lg:col-span-4 lg:col-start-9">
-        <Figure {...figure} />
+/** Section masthead: a mono index + label line, then a serif title. */
+export const SectionHead = ({ index, label, title, lead }) => (
+  <div className="mb-10 lg:mb-12">
+    <Reveal>
+      <div className="mb-4 flex items-center gap-3">
+        <span className="meta text-moss">{index}</span>
+        <span className="meta text-muted">{label}</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+    </Reveal>
+    <Reveal delay={0.05}>
+      <h2 className="balance font-serif text-[34px] font-normal leading-[1.05] tracking-[-0.01em] md:text-[44px]">{title}</h2>
+    </Reveal>
+    {lead ? (
+      <Reveal delay={0.1}>
+        <p className="pretty mt-4 max-w-prose2 text-[16px] leading-relaxed text-ink-2">{lead}</p>
       </Reveal>
     ) : null}
   </div>
 );
 
 export const Section = ({ id, children, className = '' }) => (
-  <section id={id} className={`relative scroll-mt-24 py-20 lg:py-28 ${className}`}>
-    <div className="shell relative">{children}</div>
+  <section id={id} className={`relative scroll-mt-6 border-t border-line px-6 py-16 md:px-10 lg:px-14 lg:py-24 ${className}`}>
+    <div className="relative mx-auto w-full max-w-[1100px]">{children}</div>
   </section>
-);
-
-export const Panel = ({ children, ticks = false, quiet = false, className = '' }) => (
-  <div className={`${quiet ? 'panel-quiet' : 'panel'} ${ticks ? 'ticks' : ''} ${className}`}>{children}</div>
 );

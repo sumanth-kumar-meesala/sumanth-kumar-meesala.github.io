@@ -5,103 +5,67 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: #0B0D12;
-    color: #E8EAF0;
+    background-color: #F4F2EC;
+    color: #17201B;
   }
 
   body {
-    font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    font-variant-numeric: tabular-nums;
+    font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 
   ::selection {
-    background: #22D3C5;
-    color: #0B0D12;
+    background: #A8D9BA;
+    color: #0E3B2E;
   }
 
+  a { color: inherit; text-decoration: none; }
+
   ::-webkit-scrollbar { width: 10px; }
-  ::-webkit-scrollbar-track { background: #0B0D12; }
-  ::-webkit-scrollbar-thumb { background: #232838; }
-  ::-webkit-scrollbar-thumb:hover { background: #2F3648; }
+  ::-webkit-scrollbar-track { background: #F4F2EC; }
+  ::-webkit-scrollbar-thumb { background: #DDD9CF; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: #C9C4B6; }
 }
 
 @layer components {
-  .shell {
-    @apply mx-auto w-full max-w-shell px-5 md:px-8 lg:px-10;
-  }
-
   .meta {
     @apply font-mono text-meta uppercase;
   }
 
-  /* Terminal-style panel: hairline border over a translucent surface,
-     so the 3D scene stays faintly visible behind the content. */
-  .panel {
-    @apply relative border border-line bg-surface/70 backdrop-blur-[6px];
+  /* The citation chip that follows every grounded sentence. */
+  .cite {
+    @apply ml-1.5 inline-flex items-center gap-1 rounded bg-mint-2 px-1.5 py-[1px] align-middle font-mono text-[11px] leading-[1.5] text-moss no-underline;
+    letter-spacing: 0.01em;
+  }
+  .cite:hover { @apply bg-mint text-forest; }
+
+  .btn-primary {
+    @apply inline-flex h-12 items-center justify-between gap-3 rounded-lg bg-cream px-5 text-[15px] font-semibold text-forest transition-colors
+           hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint;
+  }
+  .btn-ghost {
+    @apply inline-flex h-12 items-center justify-between gap-3 rounded-lg border border-cream/35 px-5 text-[15px] font-medium text-cream transition-colors
+           hover:border-cream/70 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint;
   }
 
-  .panel-quiet {
-    @apply relative border border-line-2 bg-surface/40 backdrop-blur-[4px];
+  .chip {
+    @apply inline-flex min-h-[40px] items-center rounded-full border border-line-2 bg-transparent px-3.5 py-1.5 text-left text-[13px] leading-snug text-ink-2 transition-colors
+           hover:border-forest hover:bg-white hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss;
   }
 
   .tag {
-    @apply border border-line bg-surface-2/60 px-2.5 py-1.5 font-mono text-[11px] tracking-[0.04em] text-muted
-           transition-colors hover:border-teal/50 hover:text-text;
+    @apply inline-flex items-center rounded-full bg-paper-2 px-2.5 py-1 font-mono text-[11px] tracking-[0.02em] text-ink-2;
   }
-
   .tag-hot {
-    @apply border border-teal/35 bg-teal/[0.07] px-2.5 py-1.5 font-mono text-[11px] tracking-[0.04em] text-teal
-           transition-colors hover:border-teal hover:bg-teal/15;
+    @apply inline-flex items-center rounded-full bg-mint-2 px-2.5 py-1 font-mono text-[11px] tracking-[0.02em] text-moss;
   }
-
-  .btn-primary {
-    @apply relative inline-flex h-[50px] items-center justify-center gap-2 border border-teal/50 bg-teal/10 px-6
-           text-sm font-medium tracking-[0.02em] text-teal transition-all
-           hover:bg-teal hover:text-void hover:shadow-[0_0_28px_-4px_rgba(34,211,197,0.55)]
-           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal;
-  }
-
-  .btn-ghost {
-    @apply inline-flex h-[50px] items-center justify-center gap-2 border border-line bg-surface/50 px-6
-           text-sm font-medium tracking-[0.02em] text-muted transition-all
-           hover:border-amber/50 hover:text-amber
-           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber;
-  }
-
-  /* Corner ticks — the recurring "instrument panel" motif */
-  .ticks::before,
-  .ticks::after {
-    content: '';
-    position: absolute;
-    width: 9px;
-    height: 9px;
-    border-color: rgba(34, 211, 197, 0.55);
-    pointer-events: none;
-  }
-  .ticks::before { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
-  .ticks::after { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
 }
 
 @layer utilities {
   .pretty { text-wrap: pretty; }
   .balance { text-wrap: balance; }
-
-  .text-glow-teal { text-shadow: 0 0 24px rgba(34, 211, 197, 0.35); }
-
-  .hairline-grid {
-    background-image:
-      linear-gradient(to right, rgba(35, 40, 56, 0.5) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(35, 40, 56, 0.5) 1px, transparent 1px);
-    background-size: 64px 64px;
-  }
-
-  .mask-fade-b {
-    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -9,64 +9,65 @@ building LLM-powered features, autonomous agents and multi-step agentic workflow
 At Affle: core contributor to Blueprix (MCP-enabled agent orchestration), owner of Qrank
 (360° review platform used by 600+ employees globally), mentor to the AI team.
 
-## The 3D figures
+## The idea: ask my résumé
 
-Every section carries its own small 3D object — the subject of that section, modelled. They are
-not decoration bolted on; each one is the thing the section is about:
+The portfolio is an agent. The first screen is a conversation: a recruiter asks the questions they
+were going to ask anyway ("has he shipped agents to production, or just demos?", "does he need
+sponsorship?") and gets an answer in which **every sentence is a fact from the résumé, followed by a
+citation chip** that scrolls to the section it came from. If the résumé doesn't cover something —
+salary, notice period, weaknesses — the agent says so and points to the email address rather than
+guessing.
 
-| Figure | Section | What it is |
-| --- | --- | --- |
-| `lattice` | Hero | A wireframe shell around a pulsing core, orbit rings and firing nodes — agentic AI |
-| `mesh` | About | Linked cubes with a packet hopping between them — multi-agent orchestration |
-| `slabs` | Stack | A stack of server slabs with sequencing status LEDs; hovering fans them apart |
-| `branch` | Selected work | A trunk splitting into build/test/deploy leaves, with a packet running the tree |
-| `bars` | Experience | Six growing bars with lit caps — 2015 → 2026 |
-| `crystal` | Education | A faceted gem with a glowing core and orbiting satellites |
-| `beacon` | Contact | A pulsing core throwing expanding rings |
+A sticky rail on the left carries the facts a recruiter needs without asking: current role, work
+rights, availability, the résumé download and the email. Below the conversation the same content is
+laid out as readable sections (Work, Experience, Stack, Education, Contact) for anyone who would
+rather scan than ask.
 
-**They are interactive.** Drag any figure to rotate it — it keeps momentum on release, then the
-tilt eases back to its resting angle. Hovering lifts it, brightens it, speeds up its motion and
-lights the caption marker.
+### How the agent works
 
-- `src/three/models.jsx` — the seven models, each a plain three.js group
-- `src/three/Figure.jsx` — canvas wrapper, lighting, hover and drag wiring
-- `src/three/useDragRotate.js` — pointer → rotation, momentum and settle
-- `src/components/ui/Figure3D.jsx` — lazy boundary with a matching skeleton
+There is no model and no network call — the site is static on GitHub Pages and nothing a visitor
+types leaves their browser.
 
-Built defensively: each figure is `role="img"` with its caption as the accessible label,
-rendering **pauses whenever the figure scrolls off-screen**, `touch-action: pan-y` keeps vertical
-scrolling working on touch, three.js is code-split out of the first paint (page 120 kB gzip,
-figures 238 kB after), and everything goes still under `prefers-reduced-motion`.
+- `src/agent/knowledge.js` derives a list of **facts** from `src/data/resume.js`. Each fact is one
+  sentence with the words a question might use to reach it and the citation it resolves to
+  (a project, a role with its years, the Stack, Work rights…).
+- `src/agent/retriever.js` normalises the question (stop words, a synonym table so "visa" reaches
+  "sponsorship" and "QA" reaches "testing"), then tries three things in order: a small set of
+  **intents** for the questions recruiters actually ask (production agents, sponsorship, current role,
+  solo work, evals, mentoring, RAG, contact, summary…); a **skill lookup** ("does he know Python?");
+  and finally **keyword scoring** (idf-weighted overlap) against every fact. Below a confidence
+  threshold it answers "that's not in the résumé".
+- `src/components/AskPanel.jsx` renders the conversation and streams each answer character by
+  character (`useTypewriter`), instant under `prefers-reduced-motion`.
+
+Because the facts are generated from `resume.js`, updating the résumé updates the agent. If you add
+a new kind of question, add an intent in `retriever.js`; the test harness is simply calling
+`answer('…')` and reading the parts.
 
 ## Design
 
 | Token | Value |
 | --- | --- |
-| Void | `#0B0D12` |
-| Surface | `#12151D` / `#171B26` |
-| Line | `#232838` / `#1A1E2A` |
-| Text | `#E8EAF0` · muted `#9AA1B4` · dim `#6B7285` |
-| Teal (primary) | `#22D3C5` |
-| Amber (secondary) | `#F0A93B` |
-| Display / UI | Space Grotesk |
-| Metadata | JetBrains Mono, tabular numerals |
-
-Content panels are translucent with a hairline border and a light backdrop blur, so the pipeline
-stays visible behind them without competing with the copy.
+| Paper | `#F4F2EC` / `#ECE9E0` |
+| Ink | `#17201B` · secondary `#3E4640` · muted `#7A8279` |
+| Forest (rail) | `#0E3B2E` |
+| Mint / Moss (accents, citations) | `#A8D9BA` · `#1F6B4A` |
+| Answers & headings | Newsreader |
+| UI | DM Sans |
+| Metadata, citations | DM Mono |
 
 ## Content
 
 All copy is generated from [`src/data/resume.js`](src/data/resume.js), which mirrors the current
-résumé verbatim. **To update the site after a résumé change, edit that one file** — the components
-render from it and hold no copy of their own.
+résumé verbatim. **To update the site after a résumé change, edit that one file** — the sections
+and the agent both render from it and hold no copy of their own.
 
 ## Stack
 
 - React 19 + Vite
-- three.js · @react-three/fiber
 - Tailwind CSS 3
 - Framer Motion (scroll reveals)
-- lucide-react · react-scroll
+- lucide-react
 
 ## Run locally
 
@@ -78,21 +79,8 @@ npm run dev
 ## Build
 
 ```bash
-npm run build   # -> dist/
-npm run lint
+npm run build     # outputs to dist/
+npm run preview   # serve the build locally
 ```
 
-Deployment is automatic: pushing to `main` runs `.github/workflows/deploy.yml`, which builds and
-publishes `dist/` to GitHub Pages.
-
-## Sections
-
-| # | Section | Figure | Contents |
-| --- | --- | --- | --- |
-| 001 | Hero | lattice | Name, role, positioning, résumé downloads, four headline figures |
-| 002 | About | mesh | Narrative plus four capability pillars |
-| 003 | Stack | slabs | 11-group capability accordion; the three core groups open by default |
-| 004 | Selected work | branch | Blueprix · Qrank · Content Factory, plus Moose and Moonee Valley Council |
-| 005 | Experience | bars | Affle, DashAnalysis, Blaque Fracture, Archimedes, Blockfreight, ContenTerra |
-| 006 | Education & standing | crystal | Deakin M.IT, CVR B.Tech, Australian work rights |
-| 007 | Contact | beacon | Email, LinkedIn, GitHub, location, résumé downloads |
+Deploys to GitHub Pages on every push to `main` via `.github/workflows/deploy.yml`.

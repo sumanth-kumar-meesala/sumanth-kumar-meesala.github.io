@@ -1,53 +1,46 @@
 import React from 'react';
-import { ShieldCheck } from 'lucide-react';
 import { education, workRights } from '../data/resume';
-import { Section, SectionHead, Reveal, Panel } from './ui/Section';
+import { Section, SectionHead, Reveal } from './ui/Section';
 
 const Education = () => (
   <Section id="education">
-    <SectionHead
-      index="006"
-      label="Education & standing"
-      title="Credentials"
-      lead="A data-analytics master's, an engineering degree, and the right to work here without conditions."
-      figure={{ kind: 'crystal', caption: 'Data analytics · Deakin', accent: 'teal', size: 250 }}
-    />
+    <SectionHead index="04" label="Education & work rights" title="Two degrees, one passport." />
 
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      {education.map((e, i) => (
-        <Reveal key={e.degree} delay={i * 0.08} className="h-full">
-          <Panel className="flex h-full flex-col gap-4 p-6 md:p-7">
-            <div className="flex items-center justify-between">
-              <span className="meta text-dim">{e.from} {e.to}</span>
-              {e.figure ? (
-                <span className="meta border border-teal/30 bg-teal/[0.07] px-2 py-1 text-teal">
-                  WAM {e.figure.value}
-                </span>
-              ) : null}
+    <div className="grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-12">
+      <div className="flex flex-col md:col-span-8">
+        {education.map((e, i) => (
+          <Reveal key={e.degree} delay={i * 0.04}>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-2 border-t border-line py-7 sm:grid-cols-[150px_minmax(0,1fr)]">
+              <div className="meta text-ink">
+                {e.from} {e.to}
+              </div>
+              <div>
+                <h3 className="font-serif text-[24px] leading-[1.15] tracking-[-0.01em]">
+                  {e.degree}
+                  {e.major ? <span className="text-muted"> · {e.major}</span> : null}
+                </h3>
+                <div className="mt-1 text-[15px] text-ink-2">{e.institution}</div>
+                {e.figure ? (
+                  <div className="mt-3 inline-flex items-baseline gap-2">
+                    <span className="font-serif text-[28px] leading-none">{e.figure.value}</span>
+                    <span className="text-[12px] text-muted">{e.figure.label}</span>
+                  </div>
+                ) : null}
+              </div>
             </div>
-            <h3 className="text-[20px] font-semibold leading-tight tracking-[-0.02em] md:text-[23px]">
-              {e.degree}
-            </h3>
-            {e.major ? (
-              <div className="font-mono text-[12px] tracking-[0.05em] text-amber">{e.major}</div>
-            ) : null}
-            <div className="mt-auto text-[14px] text-muted">{e.institution}</div>
-          </Panel>
-        </Reveal>
-      ))}
+          </Reveal>
+        ))}
+      </div>
 
-      <Reveal delay={0.16} className="h-full">
-        <Panel
-          ticks
-          className="flex h-full flex-col gap-4 border-teal/25 bg-teal/[0.04] p-6 md:p-7"
-        >
-          <ShieldCheck className="h-6 w-6 text-teal" />
-          <h3 className="text-[20px] font-semibold leading-tight tracking-[-0.02em] md:text-[23px]">
-            {workRights.title}
-          </h3>
-          <p className="pretty text-[14px] leading-relaxed text-muted">{workRights.body}</p>
-          <div className="meta mt-auto text-teal">{workRights.note}</div>
-        </Panel>
+      <Reveal delay={0.08} className="md:col-span-4">
+        <div className="flex h-full flex-col gap-3 rounded-2xl bg-forest p-7 text-cream">
+          <div className="meta text-cream/60">Work rights</div>
+          <div className="font-serif text-[28px] leading-[1.1]">{workRights.title}</div>
+          <p className="text-[15px] leading-relaxed text-cream/80">{workRights.body}</p>
+          <div className="mt-auto pt-3">
+            <span className="inline-flex items-center rounded-full bg-mint px-3 py-1 font-mono text-[11px] text-forest">{workRights.note}</span>
+          </div>
+        </div>
       </Reveal>
     </div>
   </Section>
