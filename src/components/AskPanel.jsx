@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowUp, ChevronRight } from 'lucide-react';
 import { ask as runAgent, SUGGESTED } from '../agent/pipeline';
 import { ENDPOINT } from '../agent/generate';
+import { useTypewriter } from '../hooks/useTypewriter';
 
 const HAS_MODEL = Boolean(ENDPOINT);
 const MODEL_NOTE = HAS_MODEL ? 'gpt-oss-120b via Groq' : 'runs in your browser · nothing is sent anywhere';
-import { useTypewriter } from '../hooks/useTypewriter';
 
 let nextId = 1;
 const uid = () => nextId++;
@@ -185,12 +185,34 @@ const AskPanel = () => {
 
   const settled = useCallback(() => setBusy(false), []);
 
-  // Keep the newest turn in view as it streams.
+  // Follow the conversation as it streams — unless the reader has scrolled up.
+  const listRef = useRef(null);
+  const stickRef = useRef(true);
   useEffect(() => {
-    const el = logRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
+    const log = logRef.current;
+    const list = listRef.current;
+    if (!log || !list) return undefined;
+    const onScroll = () => {
+      stickRef.current = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+    };
+    const follow = () => {
+      if (stickRef.current) log.scrollTop = log.scrollHeight;
+    };
+    log.addEventListener('scroll', onScroll, { passive: true });
+    const ro = new ResizeObserver(follow);
+    ro.observe(list); // the text growing
+    ro.observe(log); // the panel shrinking when the prompt chips return
+    return () => {
+      log.removeEventListener('scroll', onScroll);
+      ro.disconnect();
+    };
+  }, []);
+  useEffect(() => {
+    // A new turn always re-engages following.
+    stickRef.current = true;
+    const log = logRef.current;
+    if (log) log.scrollTop = log.scrollHeight;
+  }, [messages.length]);
 
   return (
     <section id="ask" aria-label="Ask my résumé" className="flex min-h-[80vh] flex-col lg:h-screen">
@@ -204,7 +226,7 @@ const AskPanel = () => {
       </div>
 
       <div ref={logRef} role="log" aria-live="polite" aria-relevant="additions" className="flex-1 overflow-y-auto px-6 py-8 md:px-10">
-        <div className="mx-auto flex max-w-[760px] flex-col gap-7">
+        <div ref={listRef} className="mx-auto flex max-w-[760px] flex-col gap-7">
           {messages.map((m) =>
             m.role === 'user' ? (
               <div key={m.id} className="animate-rise">
