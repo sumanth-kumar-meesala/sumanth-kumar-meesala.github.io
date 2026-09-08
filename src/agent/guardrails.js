@@ -2,6 +2,9 @@
 // Rule-based on purpose — the point is that every refusal is explainable.
 
 import { profile } from './knowledge';
+import { ENDPOINT } from './generate';
+
+const HAS_MODEL = Boolean(ENDPOINT);
 
 const MAX_CHARS = 400;
 
@@ -146,11 +149,16 @@ const social = (kind) => {
     case 'greeting':
       return [{ text: 'Hello. I answer from Sumanth’s résumé only, with a citation on every sentence. Try “has he shipped agents to production?” or “does he need sponsorship?”', meta: true }];
     case 'wellbeing':
-      return [{ text: 'Running fine — no model, no network, nothing to be tired about. What would you like to know about Sumanth?', meta: true }];
+      return [{ text: HAS_MODEL ? 'Running fine. What would you like to know about Sumanth?' : 'Running fine — no model, no network, nothing to be tired about. What would you like to know about Sumanth?', meta: true }];
     case 'identity':
       return [
-        { text: 'I am a small agent that answers from Sumanth’s résumé. There is no language model behind me and nothing you type leaves your browser: a guardrail screens the question, a retriever pulls the closest facts, a reranker keeps the best few, a grounding check decides whether that is enough to answer, and every sentence carries a citation. You can open “how I answered” under any reply to see each step.', meta: true },
-        { text: 'Sumanth built the real thing — LLM-backed agents on Amazon Bedrock with the same shape: guardrails, retrieval, evals. Ask me about that.', meta: true },
+        {
+          text: HAS_MODEL
+            ? 'I am the agent on Sumanth’s portfolio. Your question is screened in your browser (injection, abuse, personal data), a retriever pulls the closest facts from his résumé, a reranker keeps the best few, and those facts — with your question — go to gpt-oss-120b on Groq through a small proxy that holds the key. The model may only answer from the facts and must cite them; every sentence is checked back against the résumé before you see it, and nothing is stored. Open “how I answered” under any reply to see each step.'
+            : 'I am a small agent that answers from Sumanth’s résumé. In this build there is no language model behind me and nothing you type leaves your browser: a guardrail screens the question, a retriever pulls the closest facts, a reranker keeps the best few, a grounding check decides whether that is enough to answer, and every sentence carries a citation. Open “how I answered” under any reply to see each step.',
+          meta: true,
+        },
+        { text: 'Sumanth builds this shape for a living — LLM-backed agents on Amazon Bedrock with guardrails, retrieval and evals gating release. Ask me about that.', meta: true },
       ];
     case 'bye':
       return [{ text: 'Thanks for reading. The résumé is one click away in the sidebar if you want to take it with you.', meta: true }];
