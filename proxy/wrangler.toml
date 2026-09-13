@@ -3,12 +3,32 @@
 name = "ask-sumanth"
 main = "src/worker.js"
 compatibility_date = "2026-09-01"
+# nodejs_compat is required by @langchain/core, and (with this compatibility
+# date) also populates process.env from the secrets below — which is the whole
+# of the LangSmith integration.
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 # Origins allowed to call this worker (comma-separated). Everything else gets 403.
 ALLOWED_ORIGINS = "https://sumanth-kumar-meesala.github.io,http://localhost:5173,http://localhost:4173"
 PRIMARY_MODEL = "openai/gpt-oss-120b"
 FALLBACK_MODEL = "llama-3.3-70b-versatile"
+# The judge that reviews each answer before it ships. Set to "" to turn the
+# second pass off — a turn then costs one model call instead of two.
+JUDGE_MODEL = "openai/gpt-oss-120b"
+# Tier-2 input screening, behind the rule-based guardrails. Only runs on
+# questions the rules already cleared. Set to "" to turn it off.
+GUARD_MODEL = "meta-llama/llama-prompt-guard-2-86m"
+GUARD_THRESHOLD = "0.9"
 
 # Secrets (set by the workflow, never committed):
-#   GROQ_API_KEY
+#   GROQ_API_KEY            the Groq key
+#   LANGSMITH_API_KEY       LangSmith, for tracing the graph  (optional)
+#   LANGSMITH_TRACING       "true" to enable it               (optional)
+#   LANGSMITH_PROJECT       project name                      (optional)
+#   LANGFUSE_PUBLIC_KEY     Langfuse, for evals and scores    (optional)
+#   LANGFUSE_SECRET_KEY                                       (optional)
+#   LANGFUSE_BASEURL        self-hosted Langfuse              (optional)
+#
+# All observability is optional: with no keys set, observe() is a no-op and the
+# agent answers exactly the same.

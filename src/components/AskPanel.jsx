@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUp, ChevronRight } from 'lucide-react';
+import { ArrowUp, ChevronRight, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { ask as runAgent, SUGGESTED } from '../agent/pipeline';
-import { ENDPOINT } from '../agent/generate';
+import { ENDPOINT, sendScore } from '../agent/generate';
 import { useTypewriter } from '../hooks/useTypewriter';
+import Graph from './Graph';
 
 const HAS_MODEL = Boolean(ENDPOINT);
 const MODEL_NOTE = HAS_MODEL ? 'gpt-oss-120b via Groq' : 'runs in your browser · nothing is sent anywhere';
@@ -36,14 +37,32 @@ const STATUS = {
   empty: 'bg-line-2',
 };
 
-/** "How I answered": the pipeline's own record of each step for this reply. */
-const Trace = ({ trace }) => {
+/**
+ * "How I answered": the pipeline's own record of each step for this reply.
+ * While the turn is running the steps arrive one at a time and the list stays
+ * open, so the wait is the agent visibly working rather than a spinner.
+ */
+const Trace = ({ trace, live = false }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
     if (open) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [open]);
   if (!trace?.length) return null;
+  if (live) {
+    return (
+      <ol className="mt-1.5 flex flex-col gap-1 border-l border-line pl-3 font-mono text-[11px] leading-relaxed text-muted">
+        {trace.map((t, i) => (
+          <li key={i} className="flex items-start gap-2 animate-rise">
+            <span className={`mt-[6px] h-1.5 w-1.5 shrink-0 rounded-full ${STATUS[t.status] ?? 'bg-line-2'}`} aria-hidden="true" />
+            <span>
+              <span className="text-ink-2">{t.name}</span> — {t.detail}
+            </span>
+          </li>
+        ))}
+      </ol>
+    );
+  }
   const last = trace[trace.length - 1];
   const summary = trace
     .filter((t) => t.name !== 'output check')
@@ -114,30 +133,67 @@ const AgentMessage = ({ parts, stream, onSettled }) => {
   );
 };
 
-const Thinking = () => (
-  <div className="flex gap-3.5 md:gap-4" aria-label="Thinking">
+/** The wait, with the work shown: each step appears as the agent finishes it. */
+const Thinking = ({ trace = [] }) => (
+  <div className="flex gap-3.5 md:gap-4">
     <span aria-hidden="true" className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-forest font-sans text-[12px] font-semibold text-mint">S</span>
-    <span className="mt-2 inline-flex items-center gap-1.5" aria-hidden="true">
-      <span className="h-1.5 w-1.5 rounded-full bg-moss animate-blink" />
-      <span className="h-1.5 w-1.5 rounded-full bg-moss animate-blink [animation-delay:200ms]" />
-      <span className="h-1.5 w-1.5 rounded-full bg-moss animate-blink [animation-delay:400ms]" />
-    </span>
+    <div className="min-w-0 flex-1">
+      <span className="mt-2 inline-flex items-center gap-1.5" aria-label="Thinking">
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-moss animate-blink" />
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-moss animate-blink [animation-delay:200ms]" />
+        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-moss animate-blink [animation-delay:400ms]" />
+      </span>
+      <Trace trace={trace} live />
+    </div>
   </div>
 );
 
+/** Was this answer any good? The rating lands on the answer's own trace. */
+const Rate = ({ traceId }) => {
+  const [sent, setSent] = useState(null);
+  const rate = (value) => {
+    setSent(value);
+    sendScore({ traceId, value });
+  };
+  if (!traceId) return null;
+  if (sent !== null) {
+    return <p className="mt-2 font-mono text-[11px] text-muted">{sent === 1 ? 'Thanks — noted.' : 'Noted; that one goes into the evals.'}</p>;
+  }
+  return (
+    <div className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-muted">
+      <span>was this useful?</span>
+      <button
+        type="button"
+        onClick={() => rate(1)}
+        aria-label="Yes, this answer was useful"
+        className="inline-flex h-6 w-6 items-center justify-center rounded hover:bg-card hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-moss"
+      >
+        <ThumbsUp className="h-3 w-3" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        onClick={() => rate(0)}
+        aria-label="No, this answer was not useful"
+        className="inline-flex h-6 w-6 items-center justify-center rounded hover:bg-card hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-moss"
+      >
+        <ThumbsDown className="h-3 w-3" aria-hidden="true" />
+      </button>
+    </div>
+  );
+};
+
 const AgentTurn = ({ m, settled }) => {
-  const [showTrace, setShowTrace] = useState(!m.stream);
   const onSettled = useCallback(() => {
-    setShowTrace(true);
     if (m.stream) settled();
   }, [m.stream, settled]);
-  if (m.pending) return <Thinking />;
+  if (m.pending) return <Thinking trace={m.trace} />;
   return (
     <div className="flex flex-col">
       <AgentMessage parts={m.parts} stream={m.stream} onSettled={onSettled} />
-      {showTrace && m.trace ? (
+      {m.trace?.length ? (
         <div className="pl-[46px] md:pl-[48px]">
           <Trace trace={m.trace} />
+          <Rate traceId={m.traceId} />
         </div>
       ) : null}
     </div>
@@ -158,6 +214,7 @@ const AskPanel = () => {
   const [messages, setMessages] = useState(() => [{ id: uid(), role: 'agent', ...OPENING, stream: false }]);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
+  const [live, setLive] = useState([]); // the running turn's steps, for the header diagram
   const historyRef = useRef([]);
   const logRef = useRef(null);
   const inputRef = useRef(null);
@@ -170,14 +227,21 @@ const AskPanel = () => {
     const q = text.trim();
     if (!q) return;
     setBusy(true);
+    setLive([]);
     setDraft('');
     const pendingId = uid();
     setMessages((m) => [
       ...m.map((x) => (x.stream ? { ...x, stream: false } : x)),
       { id: uid(), role: 'user', text: q },
-      { id: pendingId, role: 'agent', pending: true, parts: [] },
+      { id: pendingId, role: 'agent', pending: true, parts: [], trace: [] },
     ]);
-    const a = await runAgent(q, historyRef.current);
+    // Each step lands as the agent finishes it, so the trace is on screen
+    // before the answer is.
+    const onStep = (step) => {
+      setLive((t) => [...t, step]);
+      setMessages((m) => m.map((x) => (x.id === pendingId ? { ...x, trace: [...(x.trace ?? []), step] } : x)));
+    };
+    const a = await runAgent(q, historyRef.current, { onStep });
     const answerText = a.parts.map((p) => p.text).join(' ');
     historyRef.current = [...historyRef.current.slice(-5), { query: q, answer: answerText, tokens: a.tokens, intent: a.intent }];
     setMessages((m) => m.map((x) => (x.id === pendingId ? { id: pendingId, role: 'agent', ...a, stream: true } : x)));
@@ -220,7 +284,9 @@ const AskPanel = () => {
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="h-2 w-2 shrink-0 rounded-full bg-signal animate-pulse-dot" aria-hidden="true" />
           <span className="whitespace-nowrap text-[14px] font-medium">Ask my résumé</span>
-          <span className="hidden truncate font-mono text-[11px] text-muted lg:inline">· guardrails → retrieve → rerank → generate → verify</span>
+          <div className="hidden min-w-0 lg:block">
+            <Graph trace={live} running={busy} />
+          </div>
         </div>
         <span className="hidden whitespace-nowrap font-mono text-[11px] text-muted md:inline">{MODEL_NOTE}</span>
       </div>
@@ -287,7 +353,7 @@ const AskPanel = () => {
           </form>
           <p className="font-mono text-[11px] leading-relaxed text-muted">
             Answers are grounded in the résumé and every sentence is checked against it. If it isn't in there, the agent says so.{' '}
-            {HAS_MODEL ? 'Your question and the retrieved facts are sent to the model; nothing is stored.' : 'Everything runs in your browser.'}
+            {HAS_MODEL ? 'Your question is screened in your browser first, then answered by the agent running on a small proxy that holds the model key. Nothing is stored.' : 'Everything runs in your browser.'}
           </p>
         </div>
       </div>

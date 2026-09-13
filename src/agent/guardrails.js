@@ -1,10 +1,12 @@
 // Guardrails. Input: what may reach retrieval at all. Output: what may leave.
 // Rule-based on purpose — the point is that every refusal is explainable.
+//
+// Runtime-agnostic: no bundler globals, no network, no environment reads. The
+// browser screens here for instant refusals and the worker screens with this
+// same module, because a public endpoint cannot trust a client's verdict.
+// Callers that know whether a model is behind them pass `hasModel` in.
 
 import { profile } from './knowledge';
-import { ENDPOINT } from './generate';
-
-const HAS_MODEL = Boolean(ENDPOINT);
 
 const MAX_CHARS = 400;
 
@@ -94,7 +96,7 @@ export const screenInput = (raw) => {
 };
 
 /** Canned, cite-free replies for everything that never reaches retrieval. */
-export const refusal = (screen) => {
+export const refusal = (screen, hasModel = false) => {
   const contact = `Ask Sumanth directly at ${profile.email}.`;
   switch (screen.verdict) {
     case 'empty':
@@ -117,7 +119,7 @@ export const refusal = (screen) => {
         { text: 'Try “has he shipped agents to production?” or “what is his RAG experience?”', meta: true },
       ];
     case 'social':
-      return social(screen.kind);
+      return social(screen.kind, hasModel);
     case 'offcv':
       return offCv(screen.kind, contact);
     default:
@@ -140,7 +142,7 @@ const offCv = (kind, contact) => {
   }
 };
 
-const social = (kind) => {
+const social = (kind, hasModel) => {
   switch (kind) {
     case 'affection':
       return [{ text: 'That is kind — but I am a retriever over a résumé, so it would not go anywhere. Ask me about Sumanth’s work and I will be much more useful.', meta: true }];
@@ -149,11 +151,11 @@ const social = (kind) => {
     case 'greeting':
       return [{ text: 'Hello. I answer from Sumanth’s résumé only, with a citation on every sentence. Try “has he shipped agents to production?” or “does he need sponsorship?”', meta: true }];
     case 'wellbeing':
-      return [{ text: HAS_MODEL ? 'Running fine. What would you like to know about Sumanth?' : 'Running fine — no model, no network, nothing to be tired about. What would you like to know about Sumanth?', meta: true }];
+      return [{ text: hasModel ? 'Running fine. What would you like to know about Sumanth?' : 'Running fine — no model, no network, nothing to be tired about. What would you like to know about Sumanth?', meta: true }];
     case 'identity':
       return [
         {
-          text: HAS_MODEL
+          text: hasModel
             ? 'I am the agent on Sumanth’s portfolio. Your question is screened in your browser (injection, abuse, personal data), a retriever pulls the closest facts from his résumé, a reranker keeps the best few, and those facts — with your question — go to gpt-oss-120b on Groq through a small proxy that holds the key. The model may only answer from the facts and must cite them; every sentence is checked back against the résumé before you see it, and nothing is stored. Open “how I answered” under any reply to see each step.'
             : 'I am a small agent that answers from Sumanth’s résumé. In this build there is no language model behind me and nothing you type leaves your browser: a guardrail screens the question, a retriever pulls the closest facts, a reranker keeps the best few, a grounding check decides whether that is enough to answer, and every sentence carries a citation. Open “how I answered” under any reply to see each step.',
           meta: true,

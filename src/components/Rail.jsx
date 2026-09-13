@@ -8,6 +8,7 @@ const NAV = [
   { id: 'experience', label: 'Experience' },
   { id: 'stack', label: 'Stack' },
   { id: 'education', label: 'Education' },
+  { id: 'agent', label: 'How it answers' },
   { id: 'contact', label: 'Contact' },
 ];
 
