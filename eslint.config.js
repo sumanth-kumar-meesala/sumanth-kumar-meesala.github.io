@@ -26,4 +26,9 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Build scripts and the worker run outside the browser.
+    files: ['scripts/**/*.js', 'proxy/**/*.js'],
+    languageOptions: { globals: { ...globals.node, ...globals.serviceworker } },
+  },
 ])

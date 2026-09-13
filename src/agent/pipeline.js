@@ -1,45 +1,42 @@
-// The agent, end to end. Each step records what it did so the UI can show
-// "how I answered": guardrails in, query understanding, routing + retrieval,
-// reranking, generation (gpt-oss-120b on Groq through the proxy — or the
-// local composer when the proxy is unreachable), guardrails out.
+// The agent as the browser sees it.
+//
+// When a worker is configured, the graph runs there (proxy/src/graph.js) and
+// this file is a client: it screens the question locally first — so an
+// injection is refused without a single network call — then streams the
+// worker's steps back as they happen.
+//
+// Without a worker, or when one is unreachable, `local()` below answers from
+// the résumé in this bundle: guardrails, query understanding, routing and
+// BM25 retrieval, reranking, a grounding gate, and the output check.
+//
+// It never calls a model. Generation, judging and the retry cycle belong to
+// the graph in the worker — having a second copy here meant two answers to
+// the same question maintained side by side, which is a drift surface, not a
+// feature. This is the offline composer and nothing more.
 
-import { profile, byId } from './knowledge';
 import { understand, resolveFollowUp } from './query';
 import { screenInput, refusal, screenOutput } from './guardrails';
 import { retrieve, CORPUS } from './retrieve';
 import { route } from './intents';
 import { rerank } from './rerank';
-import { compose } from './compose';
-import { ENDPOINT, generate, toParts } from './generate';
-
-const ANSWER_AT = 0.42; // local mode: confidence needed to answer plainly
-const HEDGE_AT = 0.22; // local mode: below this, refuse
-const CONTEXT_MAX = 10; // facts handed to the model
+import { ground } from './ground';
+import { ENDPOINT, askRemote } from './generate';
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
-const NOT_IN_CV = () => [
-  { text: 'That is not in the résumé, so I will not guess.', meta: true },
-  { text: `Ask Sumanth directly at ${profile.email}, or try one of the questions below.`, meta: true },
-];
-
-const dedupe = (facts) => {
-  const seen = new Set();
-  return facts.filter((f) => f && !seen.has(f.id) && seen.add(f.id));
-};
-
 /**
- * Answer a question.
- * @param raw      the visitor's text
- * @param history  [{ query, answer, tokens, intent }] previous turns (oldest first)
- * @param opts     { generator } — override the generator (tests); `null` forces local mode
- * @returns Promise<{ parts, intent, trace, tokens, model }>
+ * Answer from the résumé in this bundle, with no model involved.
+ * @param opts { hasModel, onStep } — hasModel only changes how the agent describes itself
  */
-export const ask = async (raw, history = [], opts = {}) => {
-  const generator = 'generator' in opts ? opts.generator : ENDPOINT ? generate : null;
+export const local = async (raw, history = [], opts = {}) => {
+  const hasModel = opts.hasModel ?? false;
   const trace = [];
   const t0 = now();
-  const step = (name, status, detail) => trace.push({ name, status, detail, ms: Math.round((now() - t0) * 10) / 10 });
+  const step = (name, status, detail) => {
+    const entry = { name, status, detail, ms: Math.round((now() - t0) * 10) / 10 };
+    trace.push(entry);
+    opts.onStep?.(entry);
+  };
   const finish = (parts, intent, tokens, model = null) => {
     const out = screenOutput(parts, CORPUS);
     const cited = out.parts.filter((p) => p.cite).length;
@@ -58,7 +55,7 @@ export const ask = async (raw, history = [], opts = {}) => {
     const label = screen.verdict === 'social' ? `handled as conversation (${screen.kind})` : screen.verdict === 'offcv' ? `not a résumé question (${screen.kind})` : `blocked: ${screen.verdict}`;
     step('guardrails', 'blocked', label);
     const intent = screen.kind ? `${screen.verdict}:${screen.kind}` : screen.verdict;
-    return finish(refusal(screen), intent, []);
+    return finish(refusal(screen, hasModel), intent, []);
   }
   step('guardrails', 'passed', `no injection, abuse or personal data${screen.truncated ? '; question truncated to 400 chars' : ''}`);
 
@@ -84,43 +81,48 @@ export const ask = async (raw, history = [], opts = {}) => {
   step('rerank', rr.selected.length ? 'passed' : 'empty', `${rr.considered} considered · ${rr.selected.length} kept (MMR) · confidence ${rr.confidence.toFixed(2)}`);
   const intent = routed?.id ?? (rr.selected.length ? 'search' : 'none');
 
-  // 5. Generate (model) ---------------------------------------------------
-  if (generator) {
-    const context = dedupe([byId('name'), ...(routed?.facts ?? []), ...rr.selected.map((s) => s.f), byId('rights')]).slice(0, CONTEXT_MAX);
-    const chat = history.slice(-3).flatMap((h) => [
-      { role: 'user', content: h.query },
-      { role: 'assistant', content: h.answer },
-    ]);
-    try {
-      const gen = await generator({ question: screen.query, facts: context, history: chat });
-      const parsed = toParts(gen.text, context);
-      step('generate', 'passed', `${gen.model} · ${context.length} facts in context · ${gen.ms} ms`);
-      step(
-        'grounding',
-        parsed.badRefs ? 'warned' : 'passed',
-        `${parsed.parts.length - parsed.uncited} sentence${parsed.parts.length - parsed.uncited === 1 ? '' : 's'} cited by the model${parsed.badRefs ? ` · ${parsed.badRefs} dangling reference${parsed.badRefs === 1 ? '' : 's'} removed` : ''}`,
-      );
-      return finish(parsed.parts, intent, tokens, gen.model);
-    } catch (err) {
-      step('generate', 'warned', `model unavailable (${err.code ?? 'error'}) · composing locally`);
-    }
-  } else {
-    step('generate', 'skipped', ENDPOINT ? 'model disabled' : 'no model configured · composing locally');
-  }
+  // 5. No model here, by design ---------------------------------------------
+  step('generate', 'skipped', hasModel ? 'worker unreachable · composing locally' : 'no model configured · composing locally');
 
-  // 6. Local fallback: grounding gate + composer -----------------------------
-  if (routed) {
-    step('grounding', 'passed', 'rule-selected facts, every one cited');
-    return finish(compose(routed.facts.slice(0, 4)), intent, tokens);
+  // 6. Grounding gate + composer ---------------------------------------------
+  const g = ground({ routed, selected: rr.selected, confidence: rr.confidence, intent });
+  step('grounding', g.status, g.detail);
+  return finish(g.parts, g.intent, tokens);
+};
+
+/**
+ * Answer a question.
+ *
+ * Routes to the worker when one is configured, and falls back to `local()` if
+ * it cannot be reached — so the agent never simply fails.
+ *
+ * @param raw      the visitor's text
+ * @param history  [{ query, answer, tokens, intent }] previous turns (oldest first)
+ * @param opts     { onStep, signal }
+ * @returns Promise<{ parts, intent, trace, tokens, model }>
+ */
+export const ask = async (raw, history = [], opts = {}) => {
+  if (!ENDPOINT) return local(raw, history, opts);
+
+  // Tier 1, in the browser: an injection is refused here, before any network
+  // call. The worker screens again with this same module — a public endpoint
+  // cannot trust a client's verdict — but the visitor never waits for that.
+  const screened = screenInput(raw ?? '');
+  if (screened.verdict !== 'ok') return local(raw, history, { hasModel: true, onStep: opts.onStep });
+
+  // Collect the streamed steps so the returned trace is complete even for a
+  // caller that passed no onStep.
+  const trace = [];
+  const onStep = (entry) => {
+    trace.push(entry);
+    opts.onStep?.(entry);
+  };
+  try {
+    const remote = await askRemote({ question: raw, history, onStep }, { signal: opts.signal });
+    return { parts: remote.parts, intent: remote.intent, trace, tokens: remote.tokens, model: remote.model, degraded: remote.degraded, traceId: remote.traceId };
+  } catch {
+    return local(raw, history, { hasModel: true, onStep: opts.onStep });
   }
-  const conf = Math.round(rr.confidence * 100) / 100;
-  if (!rr.selected.length || rr.confidence < HEDGE_AT) {
-    step('grounding', 'blocked', `confidence ${conf} < ${HEDGE_AT} · declined to answer`);
-    return finish(NOT_IN_CV(), 'none', tokens);
-  }
-  const hedge = rr.confidence < ANSWER_AT;
-  step('grounding', hedge ? 'warned' : 'passed', `confidence ${conf}${hedge ? ' · answering with a caveat' : ''}`);
-  return finish(compose(rr.selected.map((s) => s.f), { hedge }), hedge ? 'hedged' : intent, tokens);
 };
 
 export { SUGGESTED } from './intents';

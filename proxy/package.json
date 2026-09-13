@@ -5,9 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test": "vitest run"
   },
   "devDependencies": {
     "wrangler": "^4"
+  },
+  "dependencies": {
+    "@langchain/langgraph": "^1.4.15",
+    "@langchain/core": "^1.2.11",
+    "langfuse": "^3.38.20",
+    "zod": "^4.1.13"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260911.1": true
   }
 }

@@ -5,10 +5,11 @@ import Work from './components/Work';
 import Experience from './components/Experience';
 import Stack from './components/Stack';
 import Education from './components/Education';
+import EvalPanel from './components/EvalPanel';
 import Footer from './components/Footer';
 import { useActiveSection } from './hooks/useActiveSection';
 
-const SECTION_IDS = ['ask', 'work', 'experience', 'stack', 'education', 'contact'];
+const SECTION_IDS = ['ask', 'work', 'experience', 'stack', 'education', 'agent', 'contact'];
 
 /**
  * Two columns: the facts rail (sticky) and the page. The first screen of the
@@ -29,6 +30,7 @@ function App() {
           <Experience />
           <Stack />
           <Education />
+          <EvalPanel />
         </main>
         <Footer />
       </div>

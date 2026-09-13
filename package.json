@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "predev": "npm run evals",
     "build": "vite build",
+    "prebuild": "npm run evals",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "evals": "vite-node scripts/evals.js"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",
@@ -27,6 +30,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "langfuse": "^3.38.20",
     "postcss": "^8.5.8",
     "tailwindcss": "^3.4.19",
     "vite": "^8.0.1",
